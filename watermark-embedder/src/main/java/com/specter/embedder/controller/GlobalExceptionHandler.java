@@ -1,11 +1,11 @@
 package com.specter.embedder.controller;
 
+import com.specter.embedder.controller.support.RequestContext;
 import com.specter.embedder.dto.ErrorResponse;
 import com.specter.embedder.exception.EmbedException;
 import com.specter.embedder.exception.ErrorCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -13,6 +13,11 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
+/**
+ * Contract section 6.3 — tum hatalari ortak {@link ErrorResponse} formatina cevirir.
+ * Her handler iki seyle ilgilenir: dogru log seviyesi + dogru ErrorCode mapping.
+ * Response build'i {@link #respond(ErrorCode, String)} helper'inda toplanir.
+ */
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -20,34 +25,34 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(EmbedException.class)
     public ResponseEntity<ErrorResponse> handleEmbed(EmbedException ex) {
-        if (ex.errorCode().httpStatus() >= 500) {
-            log.error("Embed error {}", ex.errorCode(), ex);
+        ErrorCode code = ex.errorCode();
+        if (code.httpStatus() >= 500) {
+            log.error("Embed error {}", code, ex);
         } else {
-            log.warn("Embed error {}: {}", ex.errorCode(), ex.getMessage());
+            log.warn("Embed error {}: {}", code, ex.getMessage());
         }
-        return ResponseEntity.status(ex.errorCode().httpStatus())
-                .body(ErrorResponse.of(ex.errorCode().name(), ex.getMessage(), MDC.get("requestId")));
+        return respond(code, ex.getMessage());
     }
 
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ResponseEntity<ErrorResponse> handleTooLarge(MaxUploadSizeExceededException ex) {
         log.warn("Upload too large: {}", ex.getMessage());
-        return ResponseEntity.status(ErrorCode.FILE_TOO_LARGE.httpStatus())
-                .body(ErrorResponse.of(ErrorCode.FILE_TOO_LARGE.name(),
-                        "uploaded file exceeds the configured limit", MDC.get("requestId")));
+        return respond(ErrorCode.FILE_TOO_LARGE, "uploaded file exceeds the configured limit");
     }
 
     @ExceptionHandler({MissingServletRequestParameterException.class, MissingServletRequestPartException.class})
     public ResponseEntity<ErrorResponse> handleMissing(Exception ex) {
-        return ResponseEntity.status(ErrorCode.MISSING_FIELD.httpStatus())
-                .body(ErrorResponse.of(ErrorCode.MISSING_FIELD.name(), ex.getMessage(), MDC.get("requestId")));
+        return respond(ErrorCode.MISSING_FIELD, ex.getMessage());
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGeneric(Exception ex) {
         log.error("Unhandled error", ex);
-        return ResponseEntity.status(ErrorCode.INTERNAL_ERROR.httpStatus())
-                .body(ErrorResponse.of(ErrorCode.INTERNAL_ERROR.name(),
-                        "internal error; check logs for correlation id", MDC.get("requestId")));
+        return respond(ErrorCode.INTERNAL_ERROR, "internal error; check logs for correlation id");
+    }
+
+    private static ResponseEntity<ErrorResponse> respond(ErrorCode code, String message) {
+        return ResponseEntity.status(code.httpStatus())
+                .body(ErrorResponse.of(code.name(), message, RequestContext.currentRequestId()));
     }
 }
