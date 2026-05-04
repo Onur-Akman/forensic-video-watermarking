@@ -5,15 +5,24 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.specter.embedder.config.ContractConstants;
+import com.specter.embedder.config.EmbedderProperties;
 import com.specter.embedder.core.crypto.AuthTag;
 import com.specter.embedder.core.crypto.Hkdf;
 import com.specter.embedder.core.crypto.Prng;
+import com.specter.embedder.core.dct.Dct2D;
+import com.specter.embedder.core.dct.PairModulator;
+import com.specter.embedder.core.grid.GridMapper;
+import com.specter.embedder.service.DctEmbedder;
+import com.specter.embedder.service.KeyManager;
+import com.specter.embedder.service.PayloadEncoder;
+import com.specter.embedder.service.PsnrCalculator;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.HexFormat;
 
 /**
@@ -67,6 +76,7 @@ public final class TestVectorGenerator {
         writePrngSample(outDir, prngKey);
         writePrngPairMap(outDir, prngKey);
         writeAuthTag(outDir, authKey);
+        writeDctEmbedPoints(outDir);
 
         System.out.println("[generator] done");
     }
@@ -253,6 +263,111 @@ public final class TestVectorGenerator {
             vectors.add(node);
         }
         write(outDir, "auth_tag.json", root);
+    }
+
+    // --------- dct_embed_points ---------
+
+    private static void writeDctEmbedPoints(Path outDir) throws IOException {
+        // Manuel DI (Spring yok); KeyManager/DctEmbedder dummy master uzerinden init.
+        EmbedderProperties props = new EmbedderProperties(
+                DUMMY_MASTER_HEX,
+                ".",
+                ContractConstants.H264_CRF_DEFAULT,
+                ContractConstants.CONTRACT_VERSION);
+        KeyManager keyManager = new KeyManager(props);
+        DctEmbedder embedder = new DctEmbedder(keyManager, new PsnrCalculator());
+        PayloadEncoder payloadEncoder = new PayloadEncoder(keyManager);
+
+        long testId = 0x5C2A91FEL;
+        byte[] codeword = payloadEncoder.encode(testId);
+
+        ObjectNode root = baseRoot("dct_embed_points",
+                "Per-point DCT pair modulation traces from full embedIntoYPlane scenario "
+                        + "(contract section 4.1, 4.2, 4.3). Each scenario: 1080p uniform-gray Y plane, "
+                        + "test seed id 0x5C2A91FE. Vector 1 uses contract DELTA=12.0 and asserts the "
+                        + "happy-path (252 modulation traces + frame psnr). Vector 2 uses an extreme "
+                        + "delta to force PSNR < floor and asserts the skip path (yPlane reverted, "
+                        + "embedded=false; contract section 10.2 path b).");
+        ArrayNode vectors = root.putArray("vectors");
+
+        vectors.add(makeDctEmbedPointVector(
+                "uniform_gray_1920x1080_id_0x5C2A91FE_delta_12",
+                "Happy path: contract DELTA=12.0; expect frame_skipped=false, PSNR > floor.",
+                1920, 1080, 128, testId, ContractConstants.DELTA, codeword, embedder, true));
+
+        vectors.add(makeDctEmbedPointVector(
+                "uniform_gray_1920x1080_id_0x5C2A91FE_delta_800_skip",
+                "Skip path: extreme DELTA=800 forces PSNR < floor; expect frame_skipped=true, "
+                        + "yPlane reverted to original.",
+                1920, 1080, 128, testId, 800.0, codeword, embedder, false));
+
+        write(outDir, "dct_embed_points.json", root);
+    }
+
+    private static ObjectNode makeDctEmbedPointVector(String id, String description,
+                                                      int W, int H, int yFill, long watermarkId,
+                                                      double delta, byte[] codeword,
+                                                      DctEmbedder embedder, boolean includePoints) {
+        // 1) Run full embedIntoYPlane to get canonical PSNR + skip outcome
+        byte[] yCanonical = new byte[W * H];
+        Arrays.fill(yCanonical, (byte) yFill);
+        DctEmbedder.EmbedResult result = embedder.embedIntoYPlane(yCanonical, W, H, codeword, delta);
+
+        ObjectNode vec = MAPPER.createObjectNode();
+        vec.put("id", id);
+        vec.put("description", description);
+        ObjectNode input = vec.putObject("input");
+        input.put("scenario", "uniform_gray");
+        input.put("frame_width", W);
+        input.put("frame_height", H);
+        input.put("y_fill", yFill);
+        input.put("watermark_id_hex", String.format("0x%08X", watermarkId));
+        input.put("delta", delta);
+        ObjectNode expected = vec.putObject("expected");
+        expected.put("frame_skipped", !result.embedded());
+        expected.put("psnr_db", result.psnrDb());
+
+        // 2) For happy path, also emit per-point modulation traces by replaying the loop
+        if (includePoints) {
+            int[] cells = embedder.planCells();
+            int[] pairs = embedder.planPairs();
+            byte[] bits = DctEmbedder.repeatCodeword(codeword);
+            GridMapper grid = new GridMapper(W, H);
+            Dct2D dct = new Dct2D(ContractConstants.DCT_BLOCK_SIZE);
+
+            byte[] yReplay = new byte[W * H];
+            Arrays.fill(yReplay, (byte) yFill);
+            ArrayNode points = expected.putArray("points");
+            for (int i = 0; i < ContractConstants.EMBED_POINTS_PER_FRAME; i++) {
+                int[] xy = grid.cellToBlock(cells[i]);
+                double[] block = DctEmbedder.extractBlock(yReplay, W, xy[0], xy[1]);
+                dct.forward(block);
+                int[][] pair = ContractConstants.DCT_PAIRS[pairs[i]];
+                int idxA = pair[0][0] * ContractConstants.DCT_BLOCK_SIZE + pair[0][1];
+                int idxB = pair[1][0] * ContractConstants.DCT_BLOCK_SIZE + pair[1][1];
+                double aBefore = block[idxA];
+                double bBefore = block[idxB];
+                PairModulator.embedBit(block, pairs[i], bits[i] & 1, delta);
+                double aAfter = block[idxA];
+                double bAfter = block[idxB];
+                dct.inverse(block);
+                DctEmbedder.writeBlock(yReplay, W, xy[0], xy[1], block);
+
+                ObjectNode pt = MAPPER.createObjectNode();
+                pt.put("i", i);
+                pt.put("cell", cells[i]);
+                pt.put("pair_index", pairs[i]);
+                pt.put("bit", bits[i] & 1);
+                ArrayNode bArr = pt.putArray("before");
+                bArr.add(aBefore);
+                bArr.add(bBefore);
+                ArrayNode aArr = pt.putArray("after");
+                aArr.add(aAfter);
+                aArr.add(bAfter);
+                points.add(pt);
+            }
+        }
+        return vec;
     }
 
     // --------- common ---------
