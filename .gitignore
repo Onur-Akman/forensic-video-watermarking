@@ -33,3 +33,7 @@ logs/
 # Embedder runtime output volume
 shared/data/embedded/*
 !shared/data/embedded/.gitkeep
+
+# User-local test scratch (WatermarkImageTool inputs/outputs)
+/input/
+/output/
