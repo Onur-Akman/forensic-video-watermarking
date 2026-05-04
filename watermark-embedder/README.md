@@ -8,10 +8,16 @@ Implementation reference: [`docs/contract-new.md`](../docs/contract-new.md) v1.
 
 - **Runtime:** Java 21 (Temurin)
 - **Framework:** Spring Boot 3.4.x (web, actuator, validation)
-- **Build:** Maven 3.9+
-- **Video I/O:** JavaCV 1.5.11 (FFmpeg + OpenCV bindings)
+- **Build:** Maven 3.9+ (mvnw wrapper dahil)
+- **Video metadata:** JavaCV 1.5.11 (FFmpeg + OpenCV bindings) — sadece probe icin (genislik, yukseklik, fps)
+- **Video decode/encode:** **system `ffmpeg` subprocess** (libx264 ile) — contract §4.4 H.264/libx264/yuv420p/CRF18 zorunlulugu icin. JavaCV'nin bundled FFmpeg dagitimi libx264'u **icermez** (lisans nedeniyle), bu yuzden gercek video pipeline'inda system ffmpeg'e duser. Kullanici talimatindaki "fall back to direct FFmpeg subprocess" yolu (M2'de implemente edildi).
 - **DCT:** JTransforms 3.1
 - **Crypto:** JDK `javax.crypto` (HMAC-SHA256), in-house HKDF
+
+### Dependencies (system)
+
+- Java 21 JDK
+- `ffmpeg` (with libx264 enabled) on PATH — macOS: `brew install ffmpeg`
 
 ## Running locally
 

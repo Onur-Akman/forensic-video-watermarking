@@ -67,14 +67,15 @@ public class DctEmbedder {
             writeBlock(yPlane, width, xy[0], xy[1], block);
         }
 
-        double psnr = psnrCalculator.psnrDb(originalY, yPlane);
+        double mse = psnrCalculator.mse(originalY, yPlane);
+        double psnr = psnrCalculator.psnrDb(mse);
         if (psnr < ContractConstants.PSNR_FLOOR_DB) {
             System.arraycopy(originalY, 0, yPlane, 0, yPlane.length);
             log.warn("frame skipped: PSNR {} dB < floor {} dB (contract section 10.2 path b)",
                     String.format("%.2f", psnr), ContractConstants.PSNR_FLOOR_DB);
-            return new EmbedResult(false, psnr);
+            return new EmbedResult(false, psnr, mse);
         }
-        return new EmbedResult(true, psnr);
+        return new EmbedResult(true, psnr, mse);
     }
 
     /** Cell index list deterministik PRNG ile. Diagnostik/test icin paylasilir. */
@@ -130,7 +131,8 @@ public class DctEmbedder {
         }
     }
 
-    /** Embedding sonucu: skip durumunda yPlane orijinaline geri yuklenmistir. */
-    public record EmbedResult(boolean embedded, double psnrDb) {
+    /** Embedding sonucu: skip durumunda yPlane orijinaline geri yuklenmistir.
+     *  psnrDb ve mse PRE-revert degerlerdir (skip kararini tetikleyen olcumler). */
+    public record EmbedResult(boolean embedded, double psnrDb, double mse) {
     }
 }

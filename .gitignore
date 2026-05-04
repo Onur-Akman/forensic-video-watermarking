@@ -28,7 +28,7 @@ logs/
 
 # Runtime media outputs (contract §7)
 *.mp4
-!shared/test-vectors/*.mp4
+!shared/test-vectors/**/*.mp4
 
 # Embedder runtime output volume
 shared/data/embedded/*
