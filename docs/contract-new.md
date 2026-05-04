@@ -51,8 +51,10 @@ Gomulmeden once kimlik dogrulama ve hata duzeltme uygulanir:
    - `p2` = pozisyon 2, 3, 6, 7'nin XOR'u.
    - `p4` = pozisyon 4, 5, 6, 7'nin XOR'u.
 5. **Interleaver**: 84 bit codeword, `interleave_key`'den turetilen PRNG ile
-   uretilen sabit permutation araciligiyla yeniden siralanir. Bu, DCT
-   bolgesindeki burst error'larin tek bir nibble'a yigilmasini engeller.
+   uretilen sabit permutation araciligiyla yeniden siralanir.
+   Yon (deterministik): `interleaved[i] = codeword[permutation[i]]` (gather).
+   Extractor deinterleave icin inverse permutation kullanir.
+   Bu, DCT bolgesindeki burst error'larin tek bir nibble'a yigilmasini engeller.
 
 Ozet:
 
