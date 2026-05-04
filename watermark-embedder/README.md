@@ -17,9 +17,12 @@ Implementation reference: [`docs/contract-new.md`](../docs/contract-new.md) v1.
 
 `SPECTER_WM_KEY` env var (64 hex chars, contract section 2.1) is required.
 
+Maven kurmaya gerek yok — projeyle birlikte gelen `mvnw` wrapper ilk kosturmada
+Maven 3.9.15'i indirir (sadece Java 21 JDK gerekir).
+
 ```sh
 SPECTER_WM_KEY=00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff \
-  mvn spring-boot:run
+  ./mvnw spring-boot:run
 ```
 
 Default port: `8081` (override with `EMBEDDER_PORT`).
@@ -45,8 +48,14 @@ Tam request/response sekli icin contract section 6.
 ## Testing
 
 ```sh
-mvn test
+./mvnw test
 ```
 
 Unit testler `core/` paketinde Spring olmadan calisir; entegrasyon testleri
-`@SpringBootTest` ile context yukler.
+`@SpringBootTest` ile context yukler. Test-vector regenerate icin:
+
+```sh
+./mvnw -q test-compile exec:java \
+  -Dexec.mainClass=com.specter.embedder.core.vectors.TestVectorGenerator \
+  -Dexec.classpathScope=test
+```
