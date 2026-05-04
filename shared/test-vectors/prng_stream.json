@@ -1,0 +1,38 @@
+{
+  "schema_version" : 1,
+  "contract_version" : "v1",
+  "name" : "prng_stream",
+  "description" : "HMAC-SHA256 counter stream output for each Specter PRNG context (contract section 2.3, 2.4). byte_count > 32 forces counter increment past 1 HMAC block.",
+  "generated_by" : "TestVectorGenerator",
+  "vectors" : [ {
+    "id" : "interleaver_first128",
+    "input" : {
+      "key_hex" : "3d1c5d28170317577ec376204f5c12f89ec73cfe416bc3510083012c68c3cc65",
+      "context_ascii" : "specter-v1/interleaver/84",
+      "byte_count" : 128
+    },
+    "expected" : {
+      "bytes_hex" : "e8b3755cb3dded3a06ab30276b8cacaf633f3be8529bee3eaf16edb9b6f2b5fb16ff6c03689b703aae10315a27c0fcc57f59fe4864a7aaeb18af3d65cc04eaaa2343d9ecd43d4db474cab1a389ff29c16e41804d0b409f4f16f86f4b7e1de17709c9a0e8804fc4dca8b340e230a784823e70534e48a3bcb65a4eaededb532b72"
+    }
+  }, {
+    "id" : "cell_map_first128",
+    "input" : {
+      "key_hex" : "471fa92a43ae5853a3068ca7c152fb1faf662892436c910edea59d59f89c64ed",
+      "context_ascii" : "specter-v1/cell-map/48x27/252",
+      "byte_count" : 128
+    },
+    "expected" : {
+      "bytes_hex" : "bae222617772697b788b2531d38268b6afecdbe2bbef81653e80c446af5ced262229b317409e459f820fed6a3fe9f9385252363a49f6025faa5a0558bf16dd3245919a6e38eeaf2da626b4aa98daf0dc69309f99612aa16a272c5dbd04f9e3d8ab9d454046b2ad3bd4fa0e23e7249065d1feba8e8b30fb29b7f316f51d7d96ee"
+    }
+  }, {
+    "id" : "pair_map_first128",
+    "input" : {
+      "key_hex" : "471fa92a43ae5853a3068ca7c152fb1faf662892436c910edea59d59f89c64ed",
+      "context_ascii" : "specter-v1/pair-map/252",
+      "byte_count" : 128
+    },
+    "expected" : {
+      "bytes_hex" : "318d8e6ef1636ab3fd41564e66314582892b46d7dced61ff7a3820742fa6dc7e1b6b62b719a0cda3b9add769f1fa6ab3eab40108afa7545790e8ee9230967edce0e0f92d82261dbdc10e9ec500dd052e67c17bf815679aedc5882217bd4ca694f3f82401fb60cba546e84abda5fe2c33c15f4d332726e94da0e7882c3f9583c7"
+    }
+  } ]
+}

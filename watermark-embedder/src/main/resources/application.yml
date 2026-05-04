@@ -1,0 +1,31 @@
+server:
+  port: ${EMBEDDER_PORT:8081}
+
+spring:
+  application:
+    name: watermark-embedder
+  servlet:
+    multipart:
+      max-file-size: ${MAX_UPLOAD_MB:500}MB
+      max-request-size: ${MAX_UPLOAD_MB:500}MB
+  jackson:
+    property-naming-strategy: SNAKE_CASE
+    default-property-inclusion: non_null
+
+management:
+  endpoints:
+    web:
+      base-path: /actuator
+      exposure:
+        include: health,info
+
+logging:
+  level:
+    root: ${LOG_LEVEL:INFO}
+    com.specter.embedder: ${LOG_LEVEL:INFO}
+
+specter:
+  wm-key: ${SPECTER_WM_KEY:}
+  output-dir: ${OUTPUT_DIR:/data/shared/embedded}
+  h264-crf: ${H264_CRF:18}
+  contract-version: v1

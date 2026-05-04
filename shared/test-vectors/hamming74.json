@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "contract_version": "v1",
+  "name": "hamming74",
+  "description": "Hamming(7,4) even-parity encoding per contract §1.4. Codeword bit order MSB-first: p1 p2 d1 p4 d2 d3 d4. Even-parity formulas: p1 = d1 XOR d2 XOR d4, p2 = d1 XOR d3 XOR d4, p4 = d2 XOR d3 XOR d4. Hand-authored from contract spec; do NOT regenerate from any implementation.",
+  "generated_by": "manual",
+  "vectors": [
+    { "id": "nibble_0x0", "input": { "nibble_hex": "0" }, "expected": { "codeword_bits_msb": "0000000" } },
+    { "id": "nibble_0x1", "input": { "nibble_hex": "1" }, "expected": { "codeword_bits_msb": "1101001" } },
+    { "id": "nibble_0x2", "input": { "nibble_hex": "2" }, "expected": { "codeword_bits_msb": "0101010" } },
+    { "id": "nibble_0x3", "input": { "nibble_hex": "3" }, "expected": { "codeword_bits_msb": "1000011" } },
+    { "id": "nibble_0x4", "input": { "nibble_hex": "4" }, "expected": { "codeword_bits_msb": "1001100" } },
+    { "id": "nibble_0x5", "input": { "nibble_hex": "5" }, "expected": { "codeword_bits_msb": "0100101" } },
+    { "id": "nibble_0x6", "input": { "nibble_hex": "6" }, "expected": { "codeword_bits_msb": "1100110" } },
+    { "id": "nibble_0x7", "input": { "nibble_hex": "7" }, "expected": { "codeword_bits_msb": "0001111" } },
+    { "id": "nibble_0x8", "input": { "nibble_hex": "8" }, "expected": { "codeword_bits_msb": "1110000" } },
+    { "id": "nibble_0x9", "input": { "nibble_hex": "9" }, "expected": { "codeword_bits_msb": "0011001" } },
+    { "id": "nibble_0xA", "input": { "nibble_hex": "a" }, "expected": { "codeword_bits_msb": "1011010" } },
+    { "id": "nibble_0xB", "input": { "nibble_hex": "b" }, "expected": { "codeword_bits_msb": "0110011" } },
+    { "id": "nibble_0xC", "input": { "nibble_hex": "c" }, "expected": { "codeword_bits_msb": "0111100" } },
+    { "id": "nibble_0xD", "input": { "nibble_hex": "d" }, "expected": { "codeword_bits_msb": "1010101" } },
+    { "id": "nibble_0xE", "input": { "nibble_hex": "e" }, "expected": { "codeword_bits_msb": "0010110" } },
+    { "id": "nibble_0xF", "input": { "nibble_hex": "f" }, "expected": { "codeword_bits_msb": "1111111" } },
+    {
+      "id": "packet_id_0x5C2A91FE_synthetic_tag_0xBEEF",
+      "description": "48-bit raw packet (32-bit watermark id 0x5C2A91FE concatenated with synthetic 16-bit tag 0xBEEF; tag is NOT a real auth tag — keeps Hamming test independent of HKDF/AuthTag) encoded into 12 nibbles × 7 bits = 84-bit codeword.",
+      "input": {
+        "raw_packet_bytes_hex": "5c2a91febeef",
+        "raw_packet_bits_msb": "010111000010101010010001111111101011111011101111"
+      },
+      "expected": {
+        "codeword_bits_msb": "010010101111000101010101101000110011101001111111100101100110011001011000101101111111"
+      }
+    }
+  ]
+}

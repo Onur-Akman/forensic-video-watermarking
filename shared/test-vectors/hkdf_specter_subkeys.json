@@ -1,0 +1,44 @@
+{
+  "schema_version" : 1,
+  "contract_version" : "v1",
+  "name" : "hkdf_specter_subkeys",
+  "description" : "Specter HKDF-SHA256 sub-key derivations from contract dummy master (contract section 2.1, 2.2). Salt and info stored as ASCII bytes hex.",
+  "generated_by" : "TestVectorGenerator",
+  "vectors" : [ {
+    "id" : "specter_auth_key",
+    "description" : "auth_key with info=\"payload-auth\"",
+    "input" : {
+      "ikm_hex" : "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff",
+      "salt_hex" : "70726f6a6563742d737065637465722d7631",
+      "info_hex" : "7061796c6f61642d61757468",
+      "length" : 32
+    },
+    "expected" : {
+      "okm_hex" : "71148fca12302ab57d798579ba2387ff0e7ebc413ad65bdf9160251033acc92e"
+    }
+  }, {
+    "id" : "specter_prng_key",
+    "description" : "prng_key with info=\"block-selection\"",
+    "input" : {
+      "ikm_hex" : "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff",
+      "salt_hex" : "70726f6a6563742d737065637465722d7631",
+      "info_hex" : "626c6f636b2d73656c656374696f6e",
+      "length" : 32
+    },
+    "expected" : {
+      "okm_hex" : "471fa92a43ae5853a3068ca7c152fb1faf662892436c910edea59d59f89c64ed"
+    }
+  }, {
+    "id" : "specter_interleave_key",
+    "description" : "interleave_key with info=\"bit-interleaver\"",
+    "input" : {
+      "ikm_hex" : "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff",
+      "salt_hex" : "70726f6a6563742d737065637465722d7631",
+      "info_hex" : "6269742d696e7465726c6561766572",
+      "length" : 32
+    },
+    "expected" : {
+      "okm_hex" : "3d1c5d28170317577ec376204f5c12f89ec73cfe416bc3510083012c68c3cc65"
+    }
+  } ]
+}
