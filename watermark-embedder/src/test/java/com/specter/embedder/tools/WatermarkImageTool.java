@@ -1,5 +1,9 @@
 package com.specter.embedder.tools;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.specter.embedder.config.ContractConstants;
 import com.specter.embedder.config.EmbedderProperties;
 import com.specter.embedder.m1.Roundtrip;
@@ -11,6 +15,8 @@ import com.specter.embedder.service.PsnrCalculator;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -41,6 +47,9 @@ public final class WatermarkImageTool {
     private static final String DUMMY_MASTER_HEX =
             "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff";
     private static final long DEFAULT_ID = 0x5C2A91FEL;
+
+    private static final ObjectMapper MAPPER = new ObjectMapper()
+            .enable(SerializationFeature.INDENT_OUTPUT);
 
     private WatermarkImageTool() {
     }
@@ -149,6 +158,77 @@ public final class WatermarkImageTool {
             System.err.println("[wm-image] FAIL: roundtrip ID/auth_tag mismatch.");
             System.exit(2);
         }
+
+        // expected.json — Yaren extractor self-validation icin (m1_sample sema'si)
+        Path expectedPath = pairExpectedJson(outputPath);
+        writeExpectedJson(expectedPath, outputPath, watermarkId, W, H,
+                result.psnrDb(), rt.bitConfidence(),
+                dctEmbedder.planCells(), dctEmbedder.planPairs(),
+                DctEmbedder.repeatCodeword(codeword));
+        System.out.printf("[wm-image] wrote %s (%d bytes)%n",
+                expectedPath, Files.size(expectedPath));
+    }
+
+    private static Path pairExpectedJson(Path pngPath) {
+        String name = pngPath.getFileName().toString();
+        String base = name.endsWith(".png") ? name.substring(0, name.length() - 4) : name;
+        if (base.endsWith("_watermarked")) {
+            base = base.substring(0, base.length() - "_watermarked".length());
+        }
+        return pngPath.resolveSibling(base + "_expected.json");
+    }
+
+    private static void writeExpectedJson(Path expectedPath, Path pngPath, long watermarkId,
+                                          int W, int H, double embedderPsnr, double observedConfidence,
+                                          int[] cells, int[] pairs, byte[] bits) throws IOException {
+        ObjectNode root = MAPPER.createObjectNode();
+        root.put("schema_version", 1);
+        root.put("contract_version", "v1");
+        root.put("name", "wm-image-tool-output");
+        root.put("description",
+                "Real-content color image with watermark embedded via DCT pair modulation "
+                        + "(contract section 4.2) on Y luma plane only; original Cb/Cr preserved. "
+                        + "Output is a color PNG (RGB↔YCbCr roundtrip via BT.601 JFIF full-range). "
+                        + "Extractor flow: load PNG → recompute Y from RGB → blind decode per contract "
+                        + "section 5. Should match expected.watermark_id_hex bit-perfectly with "
+                        + "auth_tag_valid=true. The cells[] gives per-cell after-embed vote sign "
+                        + "(sign of a-b at the chosen DCT pair: +1 for embedded bit=1, -1 for bit=0). "
+                        + "For real content the magnitude varies (cells with natural |a-b| ≥ DELTA "
+                        + "are not modified by the embedder; section 4.2) but the sign should always match.");
+        root.put("generated_by", "WatermarkImageTool");
+
+        ObjectNode input = root.putObject("input");
+        input.put("image_file", pngPath.getFileName().toString());
+        input.put("image_width", W);
+        input.put("image_height", H);
+        input.put("image_format", "PNG, 24-bit RGB color");
+        input.put("scenario", "real_content_color_png");
+        input.put("specter_wm_key_hex", DUMMY_MASTER_HEX);
+        input.put("delta", ContractConstants.DELTA);
+
+        ObjectNode expected = root.putObject("expected");
+        expected.put("watermark_id_hex", String.format("0x%08X", watermarkId));
+        expected.put("watermark_id_decimal", watermarkId);
+        expected.put("auth_tag_valid", true);
+        expected.put("bit_confidence_min", 0.95);
+        expected.put("psnr_db", embedderPsnr);
+        expected.put("observed_confidence_post_rgb_roundtrip", observedConfidence);
+
+        ArrayNode cellsArr = expected.putArray("cells");
+        for (int i = 0; i < ContractConstants.EMBED_POINTS_PER_FRAME; i++) {
+            int bit = bits[i] & 1;
+            ObjectNode cell = MAPPER.createObjectNode();
+            cell.put("i", i);
+            cell.put("cell_index", cells[i]);
+            cell.put("pair_index", pairs[i]);
+            cell.put("embedded_bit", bit);
+            cell.put("expected_vote_sign", bit == 1 ? 1 : -1);
+            cellsArr.add(cell);
+        }
+
+        String json = MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(root);
+        expectedPath.getParent().toFile().mkdirs();
+        Files.writeString(expectedPath, json + "\n", StandardCharsets.UTF_8);
     }
 
     private static Path defaultOutputPath(Path input) {
