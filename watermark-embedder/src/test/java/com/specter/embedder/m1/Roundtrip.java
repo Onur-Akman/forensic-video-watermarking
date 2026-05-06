@@ -2,6 +2,7 @@ package com.specter.embedder.m1;
 
 import com.specter.embedder.config.ContractConstants;
 import com.specter.embedder.core.codec.BitPacker;
+import com.specter.embedder.core.codec.Hamming74;
 import com.specter.embedder.core.crypto.AuthTag;
 import com.specter.embedder.core.crypto.Prng;
 import com.specter.embedder.core.dct.Dct2D;
@@ -37,9 +38,10 @@ import static org.bytedeco.ffmpeg.global.avutil.AV_PIX_FMT_YUV420P;
 public final class Roundtrip {
 
     private static final int M3_MAX_FRAMES = 90;
-    private static final int M3_PROBE_FRAMES = 30;
     private static final double[] M3_SCALES = {0.85, 0.90, 0.95, 1.00, 1.05};
-    private static final double[] M3_OFFSETS = {-0.05, -0.025, 0.0, 0.025, 0.05};
+    private static final double[] M3_OFFSETS = {
+            -0.05, -0.025, -0.005, -0.0025, 0.0, 0.0025, 0.005, 0.025, 0.05
+    };
     /** Assumed embed-time frame dimensions for M3 alignment-aware mapping.
      *  Contract section 3.1 snaps to 8-pixel block at embed frame grid; under
      *  scale/crop attacks the extract frame's 8-pixel grid does not align with
@@ -107,15 +109,14 @@ public final class Roundtrip {
     /**
      * M3: alignment search ile robust extract.
      *
-     * <p>1) Ilk N frame'i bellege okur (RAM-friendly bound: M3_MAX_FRAMES). 2) Adday
-     * scale/offset kombinasyonlari uzerinde first-K frame'le bit_confidence olcer
-     * (cheap probe). 3) En yuksek confidence veren alignment ile tum cached
-     * frame'lerden full extraction yapar.
+     * <p>1) Ilk N frame'i bellege okur (RAM-friendly bound: M3_MAX_FRAMES).
+     * 2) Aday scale/offset + mapping kombinasyonlarini cached frame'lerin tamami
+     * uzerinde auth-valid confidence ile skorlar. 3) En iyi adayi doner.
      *
      * <p>Crop saldirilarinin urettigi normalize-coordinate sapmasi ({@code (norm_embed
      * - offset) / scale}) bu arama ile telafi edilir; non-crop saldirilarda
-     * (bitrate, scale-down, brightness/contrast) identity {@code (1.0, 0, 0)}
-     * dogal kazanir.
+     * (bitrate, scale-down, brightness/contrast) identity veya near-identity
+     * subpixel adaylari dogal kazanir.
      */
     public static VideoExtractResult extractFromVideoWithAlignmentSearch(
             Path input, KeyManager keyManager) throws IOException {
@@ -148,35 +149,41 @@ public final class Roundtrip {
             embedSnappedXY[i][1] = (yPix / ContractConstants.DCT_BLOCK_SIZE) * ContractConstants.DCT_BLOCK_SIZE;
         }
 
-        // 3) Alignment search using first M3_PROBE_FRAMES
-        int probeCount = Math.min(M3_PROBE_FRAMES, cached.size());
+        // 3) Alignment search using the full cached frame set. Probe-only
+        // search is faster, but it can choose a high-confidence wrong crop
+        // alignment before the 90-frame vote has enough evidence to decode auth.
         Alignment best = Alignment.IDENTITY;
-        double bestConfidence = -1.0;
-        for (double s : M3_SCALES) {
-            for (double ox : M3_OFFSETS) {
-                for (double oy : M3_OFFSETS) {
-                    Accumulator acc = new Accumulator();
-                    for (int i = 0; i < probeCount; i++) {
-                        accumulateFrameVotesEmbedAware(cached.get(i), width, height,
-                                embedSnappedXY, pairs, s, ox, oy, dct, acc);
-                    }
-                    double conf = peekBitConfidence(acc);
-                    if (conf > bestConfidence) {
-                        bestConfidence = conf;
-                        best = new Alignment(s, ox, oy);
+        CandidateScore bestScore = CandidateScore.worst();
+        Result bestResult = new Result(false, 0L, 0.0);
+        for (MappingMode mode : MappingMode.values()) {
+            for (double s : M3_SCALES) {
+                for (double ox : M3_OFFSETS) {
+                    for (double oy : M3_OFFSETS) {
+                        Accumulator acc = new Accumulator();
+                        GridMapper grid = mode == MappingMode.CONTRACT_SNAPPED
+                                ? new GridMapper(width, height, s, ox, oy)
+                                : null;
+                        for (byte[] yPlane : cached) {
+                            if (mode == MappingMode.CONTRACT_SNAPPED) {
+                                accumulateFrameVotes(yPlane, width, cells, pairs, grid, dct, acc);
+                            } else {
+                                accumulateFrameVotesEmbedAware(yPlane, width, height,
+                                        embedSnappedXY, pairs, s, ox, oy, dct, acc);
+                            }
+                        }
+                        Result result = finishExtraction(acc, keyManager);
+                        CandidateScore score = new CandidateScore(result.authTagValid(), result.bitConfidence());
+                        if (score.betterThan(bestScore)) {
+                            bestScore = score;
+                            best = new Alignment(s, ox, oy);
+                            bestResult = result;
+                        }
                     }
                 }
             }
         }
 
-        // 4) Full extraction at best alignment, all cached frames
-        Accumulator acc = new Accumulator();
-        for (byte[] yPlane : cached) {
-            accumulateFrameVotesEmbedAware(yPlane, width, height,
-                    embedSnappedXY, pairs, best.scale(), best.offsetX(), best.offsetY(), dct, acc);
-        }
-        Result result = finishExtraction(acc, keyManager);
-        return new VideoExtractResult(result, best, cached.size());
+        return new VideoExtractResult(bestResult, best, cached.size());
     }
 
     /** Embed-aware: cells were snapped at 1920x1080. Map to extract frame via
@@ -206,8 +213,8 @@ public final class Roundtrip {
             dct.forward(block);
             double vote = PairModulator.readDifference(block, pairs[i]);
             int bitPos = i % ContractConstants.CODEWORD_BITS;
-            acc.sumVote[bitPos] += vote;
-            acc.sumAbsVote[bitPos] += Math.abs(vote);
+            int repeat = i / ContractConstants.CODEWORD_BITS;
+            acc.repeatVote[bitPos][repeat] += vote;
         }
     }
 
@@ -235,8 +242,8 @@ public final class Roundtrip {
             dct.forward(block);
             double vote = PairModulator.readDifference(block, pairs[i]);
             int bitPos = i % ContractConstants.CODEWORD_BITS;
-            acc.sumVote[bitPos] += vote;
-            acc.sumAbsVote[bitPos] += Math.abs(vote);
+            int repeat = i / ContractConstants.CODEWORD_BITS;
+            acc.repeatVote[bitPos][repeat] += vote;
         }
     }
 
@@ -277,27 +284,22 @@ public final class Roundtrip {
         return yPlane;
     }
 
-    private static double peekBitConfidence(Accumulator acc) {
-        double sum = 0.0;
-        int contrib = 0;
-        for (int b = 0; b < ContractConstants.CODEWORD_BITS; b++) {
-            if (acc.sumAbsVote[b] > 0) {
-                sum += Math.abs(acc.sumVote[b]) / acc.sumAbsVote[b];
-                contrib++;
-            }
-        }
-        return contrib > 0 ? sum / ContractConstants.CODEWORD_BITS : 0.0;
-    }
-
     private static Result finishExtraction(Accumulator acc, KeyManager keyManager) {
-        // 1) Hard decision per bit + bit_confidence (contract section 5.2)
-        byte[] interleavedBits = new byte[ContractConstants.CODEWORD_BITS];
+        // 1) Consolidate the 3 repeated carriers per codeword bit, then make a
+        // hard decision + confidence from the repeated soft votes.
+        double[] interleavedVotes = new double[ContractConstants.CODEWORD_BITS];
         double bitConfSum = 0.0;
         int contributingBits = 0;
         for (int b = 0; b < ContractConstants.CODEWORD_BITS; b++) {
-            interleavedBits[b] = (byte) (acc.sumVote[b] > 0 ? 1 : 0);
-            if (acc.sumAbsVote[b] > 0) {
-                bitConfSum += Math.abs(acc.sumVote[b]) / acc.sumAbsVote[b];
+            double vote = 0.0;
+            double absVote = 0.0;
+            for (int r = 0; r < ContractConstants.REPEAT_PER_FRAME; r++) {
+                vote += acc.repeatVote[b][r];
+                absVote += Math.abs(acc.repeatVote[b][r]);
+            }
+            interleavedVotes[b] = vote;
+            if (absVote > 0) {
+                bitConfSum += Math.abs(vote) / absVote;
                 contributingBits++;
             }
         }
@@ -309,27 +311,33 @@ public final class Roundtrip {
         //    codeword[perm[i]] = interleaved[i]   (contract section 1 step 5)
         Prng intPrng = new Prng(keyManager.interleaveKey(), ContractConstants.PRNG_CTX_INTERLEAVER);
         int[] perm = intPrng.permutation(ContractConstants.CODEWORD_BITS);
-        byte[] codewordBits = new byte[ContractConstants.CODEWORD_BITS];
+        double[] codewordVotes = new double[ContractConstants.CODEWORD_BITS];
         for (int i = 0; i < ContractConstants.CODEWORD_BITS; i++) {
-            codewordBits[perm[i]] = interleavedBits[i];
+            codewordVotes[perm[i]] = interleavedVotes[i];
         }
 
-        // 3) Hamming(7,4) syndrome decode -> 48-bit raw_packet (contract section 1.4)
+        // 3) Soft Hamming(7,4) decode -> 48-bit raw_packet (contract section 1.4)
         byte[] rawPacketBits = new byte[ContractConstants.RAW_PACKET_BITS];
         for (int n = 0; n < 12; n++) {
-            int[] cw = new int[7];
-            for (int b = 0; b < 7; b++) cw[b] = codewordBits[n * 7 + b] & 1;
-            int s1 = cw[0] ^ cw[2] ^ cw[4] ^ cw[6];
-            int s2 = cw[1] ^ cw[2] ^ cw[5] ^ cw[6];
-            int s4 = cw[3] ^ cw[4] ^ cw[5] ^ cw[6];
-            int syndrome = (s4 << 2) | (s2 << 1) | s1;
-            if (syndrome != 0) {
-                cw[syndrome - 1] ^= 1;
+            int bestNibble = 0;
+            double bestScore = Double.NEGATIVE_INFINITY;
+            for (int nibble = 0; nibble < 16; nibble++) {
+                byte encoded = Hamming74.encodeNibble(nibble);
+                double score = 0.0;
+                for (int b = 0; b < 7; b++) {
+                    int bit = (encoded >>> (6 - b)) & 1;
+                    double vote = codewordVotes[n * 7 + b];
+                    score += bit == 1 ? vote : -vote;
+                }
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestNibble = nibble;
+                }
             }
-            rawPacketBits[n * 4]     = (byte) cw[2]; // d1
-            rawPacketBits[n * 4 + 1] = (byte) cw[4]; // d2
-            rawPacketBits[n * 4 + 2] = (byte) cw[5]; // d3
-            rawPacketBits[n * 4 + 3] = (byte) cw[6]; // d4
+            rawPacketBits[n * 4]     = (byte) ((bestNibble >>> 3) & 1);
+            rawPacketBits[n * 4 + 1] = (byte) ((bestNibble >>> 2) & 1);
+            rawPacketBits[n * 4 + 2] = (byte) ((bestNibble >>> 1) & 1);
+            rawPacketBits[n * 4 + 3] = (byte) (bestNibble & 1);
         }
 
         // 4) raw_packet = id || auth_tag (contract section 5.1 step 7)
@@ -345,8 +353,25 @@ public final class Roundtrip {
         return new Result(authValid, watermarkId, bitConfidence);
     }
 
+    private enum MappingMode {
+        CONTRACT_SNAPPED,
+        EMBED_SNAPPED
+    }
+
+    private record CandidateScore(boolean authValid, double confidence) {
+        static CandidateScore worst() {
+            return new CandidateScore(false, -1.0);
+        }
+
+        boolean betterThan(CandidateScore other) {
+            if (authValid != other.authValid) {
+                return authValid;
+            }
+            return confidence > other.confidence;
+        }
+    }
+
     private static final class Accumulator {
-        final double[] sumVote = new double[ContractConstants.CODEWORD_BITS];
-        final double[] sumAbsVote = new double[ContractConstants.CODEWORD_BITS];
+        final double[][] repeatVote = new double[ContractConstants.CODEWORD_BITS][ContractConstants.REPEAT_PER_FRAME];
     }
 }

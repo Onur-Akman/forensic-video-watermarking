@@ -93,7 +93,7 @@ public final class M3AttackGenerator {
         long halfBitrate = Math.max(videoBitrate / 2, 100_000); // sanity floor
 
         // a) Bitrate -50%
-        runIfMissing(outDir.resolve(FILE_BITRATE), () -> {
+        runIfMissing(input, outDir.resolve(FILE_BITRATE), () -> {
             List<String> cmd = baseCmd(input);
             cmd.addAll(List.of("-b:v", String.valueOf(halfBitrate)));
             cmd.addAll(encodeOpts(hasAudio));
@@ -102,7 +102,7 @@ public final class M3AttackGenerator {
         });
 
         // b) 1080p -> 720p
-        runIfMissing(outDir.resolve(FILE_SCALE), () -> {
+        runIfMissing(input, outDir.resolve(FILE_SCALE), () -> {
             List<String> cmd = baseCmd(input);
             cmd.addAll(List.of("-vf", "scale=1280:720"));
             cmd.addAll(encodeOpts(hasAudio));
@@ -111,7 +111,7 @@ public final class M3AttackGenerator {
         });
 
         // c) 5% border crop (iw*0.9 x ih*0.9 = 5% from each side, centered)
-        runIfMissing(outDir.resolve(FILE_CROP), () -> {
+        runIfMissing(input, outDir.resolve(FILE_CROP), () -> {
             List<String> cmd = baseCmd(input);
             cmd.addAll(List.of("-vf", "crop=iw*0.9:ih*0.9"));
             cmd.addAll(encodeOpts(hasAudio));
@@ -120,7 +120,7 @@ public final class M3AttackGenerator {
         });
 
         // d) brightness +0.1 / contrast 1.1 (~+10%)
-        runIfMissing(outDir.resolve(FILE_COLOR), () -> {
+        runIfMissing(input, outDir.resolve(FILE_COLOR), () -> {
             List<String> cmd = baseCmd(input);
             cmd.addAll(List.of("-vf", "eq=brightness=0.1:contrast=1.1"));
             cmd.addAll(encodeOpts(hasAudio));
@@ -154,8 +154,10 @@ public final class M3AttackGenerator {
         return opts;
     }
 
-    private static void runIfMissing(Path target, java.util.function.Supplier<List<String>> cmdSupplier) throws IOException {
-        if (Files.exists(target) && Files.size(target) > 0) {
+    private static void runIfMissing(Path source, Path target,
+                                     java.util.function.Supplier<List<String>> cmdSupplier) throws IOException {
+        if (Files.exists(target) && Files.size(target) > 0
+                && Files.getLastModifiedTime(target).compareTo(Files.getLastModifiedTime(source)) >= 0) {
             log.info("[m3-attack] cached: {} ({} bytes)", target.getFileName(), Files.size(target));
             return;
         }

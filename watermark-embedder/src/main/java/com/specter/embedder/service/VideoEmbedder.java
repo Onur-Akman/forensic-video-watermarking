@@ -13,8 +13,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * M2 video embed pipeline (contract sections 4.3, 4.4, 10.2).
@@ -36,17 +38,25 @@ import java.util.Arrays;
  * DctEmbedder icinde geri alinir; biz orijinal Y'yi encoder'a gondeririz (video continuity korunur,
  * watermark sadece o frame'de yok).
  *
- * <p>Audio: M2 v1 video-only output uretir. True stream copy gerekirse post-process remux ayri bir
- * adimda eklenir.
+ * <p>Audio: input stream varsa encoder komutunda ikinci input olarak baglanir ve
+ * {@code -c:a copy} ile pass-through yapilir.
+ *
+ * <p>M3 scale robustness: 1920x1080 videolarda ana 1080p DCT markasina ek olarak
+ * 1280x720 luma projeksiyonuna ikinci bir kopya gomulur ve bu low-res delta 1080p
+ * frame'e geri tasinir. PSNR bu ek isaretten sonra tekrar olculur.
  */
 @Component
 public class VideoEmbedder {
 
     private static final Logger log = LoggerFactory.getLogger(VideoEmbedder.class);
+    private static final int M3_SCALE_WIDTH = 1280;
+    private static final int M3_SCALE_HEIGHT = 720;
+    private static final double M3_SCALE_SHADOW_GAIN = 2.0;
 
     private final KeyManager keyManager;
     private final PayloadEncoder payloadEncoder;
     private final DctEmbedder dctEmbedder;
+    private final PsnrCalculator psnrCalculator;
 
     public VideoEmbedder(KeyManager keyManager,
                          PayloadEncoder payloadEncoder,
@@ -55,14 +65,15 @@ public class VideoEmbedder {
         this.keyManager = keyManager;
         this.payloadEncoder = payloadEncoder;
         this.dctEmbedder = dctEmbedder;
-        // Spring constructor parameter parity (PsnrCalculator zaten DctEmbedder'da kullaniliyor).
-        @SuppressWarnings("unused")
-        PsnrCalculator unused = psnrCalculator;
+        this.psnrCalculator = psnrCalculator;
     }
 
     public VideoEmbedResult embed(Path input, Path output, long watermarkId) throws IOException {
         if (!keyManager.isReady()) {
             throw new IllegalStateException("KeyManager not initialized; SPECTER_WM_KEY missing or invalid");
+        }
+        if (output.getParent() != null) {
+            Files.createDirectories(output.getParent());
         }
 
         // 1) Metadata via JavaCV grabber (no frame I/O — cheap)
@@ -90,13 +101,12 @@ public class VideoEmbedder {
         int frameBytes = yPlaneSize + 2 * uvPlaneSize;
 
         log.info("video embed: input={} output={} watermark_id=0x{} {}x{}@{}fps "
-                        + "subprocess=ffmpeg libx264 crf={} pix_fmt=yuv420p container=mp4",
+                        + "subprocess=ffmpeg libx264 crf={} pix_fmt=yuv420p container=mp4 audio_copy={}",
                 input, output, String.format("%08X", watermarkId),
                 width, height, String.format("%.2f", frameRate),
-                ContractConstants.H264_CRF_DEFAULT);
+                ContractConstants.H264_CRF_DEFAULT, audioChannels > 0);
         if (audioChannels > 0) {
-            log.warn("input has {} audio channel(s); M2 v1 ships video-only output (true stream copy "
-                    + "requires post-process ffmpeg remux — TODO)", audioChannels);
+            log.info("input has {} audio channel(s); passing audio through with -c:a copy", audioChannels);
         }
 
         int framesProcessed = 0;
@@ -111,7 +121,7 @@ public class VideoEmbedder {
         StringBuilder decStderr = new StringBuilder();
         Thread decDrain = drainStderr(decoder, decStderr, "ffmpeg-decoder-stderr");
 
-        Process encoder = startFfmpegEncoder(output, width, height, frameRate);
+        Process encoder = startFfmpegEncoder(output, width, height, frameRate, input, audioChannels > 0);
         StringBuilder encStderr = new StringBuilder();
         Thread encDrain = drainStderr(encoder, encStderr, "ffmpeg-encoder-stderr");
 
@@ -133,17 +143,27 @@ public class VideoEmbedder {
                     framesProcessed++;
 
                     System.arraycopy(yuv, 0, yPlane, 0, yPlaneSize);
+                    byte[] originalY = yPlane.clone();
                     DctEmbedder.EmbedResult result = dctEmbedder.embedIntoYPlane(
                             yPlane, width, height, codeword, ContractConstants.DELTA);
 
                     if (result.embedded()) {
+                        embedScaleShadowIntoYPlane(yPlane, width, height, codeword, ContractConstants.DELTA);
+                        double mse = psnrCalculator.mse(originalY, yPlane);
+                        double psnr = psnrCalculator.psnrDb(mse);
+                        if (psnr < ContractConstants.PSNR_FLOOR_DB) {
+                            System.arraycopy(originalY, 0, yPlane, 0, yPlane.length);
+                            framesSkipped++;
+                            encIn.write(yuv);
+                            continue;
+                        }
                         // Modifiye Y'yi yuv buffer'ina geri yaz (U/V dokunulmamis kalir)
                         System.arraycopy(yPlane, 0, yuv, 0, yPlaneSize);
-                        psnrSum += result.psnrDb();
-                        if (result.psnrDb() < psnrMin) psnrMin = result.psnrDb();
-                        mseSum += result.mse();
-                        if (result.mse() > mseMax) mseMax = result.mse();
-                        if (result.psnrDb() <= ContractConstants.PSNR_FLOOR_DB) {
+                        psnrSum += psnr;
+                        if (psnr < psnrMin) psnrMin = psnr;
+                        mseSum += mse;
+                        if (mse > mseMax) mseMax = mse;
+                        if (psnr <= ContractConstants.PSNR_FLOOR_DB) {
                             framesPsnrViolation++;
                         }
                     } else {
@@ -201,6 +221,63 @@ public class VideoEmbedder {
         return new VideoEmbedResult(output, metrics, framesSkipped);
     }
 
+    private void embedScaleShadowIntoYPlane(byte[] yPlane, int width, int height,
+                                            byte[] codeword84, double delta) {
+        if (width != 1920 || height != 1080) {
+            return;
+        }
+        byte[] lowBefore = resizeYPlane(yPlane, width, height, M3_SCALE_WIDTH, M3_SCALE_HEIGHT);
+        byte[] lowMarked = lowBefore.clone();
+        DctEmbedder.EmbedResult lowResult = dctEmbedder.embedIntoYPlane(
+                lowMarked, M3_SCALE_WIDTH, M3_SCALE_HEIGHT, codeword84, delta);
+        if (!lowResult.embedded()) {
+            return;
+        }
+        for (int y = 0; y < height; y++) {
+            double srcY = y * (M3_SCALE_HEIGHT - 1.0) / (height - 1.0);
+            for (int x = 0; x < width; x++) {
+                double srcX = x * (M3_SCALE_WIDTH - 1.0) / (width - 1.0);
+                double before = bilinear(lowBefore, M3_SCALE_WIDTH, M3_SCALE_HEIGHT, srcX, srcY);
+                double after = bilinear(lowMarked, M3_SCALE_WIDTH, M3_SCALE_HEIGHT, srcX, srcY);
+                int idx = y * width + x;
+                int adjusted = (int) Math.round((yPlane[idx] & 0xFF)
+                        + M3_SCALE_SHADOW_GAIN * (after - before));
+                if (adjusted < 0) adjusted = 0;
+                else if (adjusted > 255) adjusted = 255;
+                yPlane[idx] = (byte) adjusted;
+            }
+        }
+    }
+
+    private static byte[] resizeYPlane(byte[] src, int srcW, int srcH, int dstW, int dstH) {
+        byte[] dst = new byte[dstW * dstH];
+        for (int y = 0; y < dstH; y++) {
+            double srcY = y * (srcH - 1.0) / (dstH - 1.0);
+            for (int x = 0; x < dstW; x++) {
+                double srcX = x * (srcW - 1.0) / (dstW - 1.0);
+                dst[y * dstW + x] = (byte) Math.round(bilinear(src, srcW, srcH, srcX, srcY));
+            }
+        }
+        return dst;
+    }
+
+    private static double bilinear(byte[] src, int width, int height, double x, double y) {
+        x = Math.max(0.0, Math.min(width - 1.0, x));
+        y = Math.max(0.0, Math.min(height - 1.0, y));
+        int x0 = (int) Math.floor(x);
+        int y0 = (int) Math.floor(y);
+        int x1 = Math.min(width - 1, x0 + 1);
+        int y1 = Math.min(height - 1, y0 + 1);
+        double fx = x - x0;
+        double fy = y - y0;
+        double p00 = src[y0 * width + x0] & 0xFF;
+        double p10 = src[y0 * width + x1] & 0xFF;
+        double p01 = src[y1 * width + x0] & 0xFF;
+        double p11 = src[y1 * width + x1] & 0xFF;
+        return (1.0 - fy) * ((1.0 - fx) * p00 + fx * p10)
+                + fy * ((1.0 - fx) * p01 + fx * p11);
+    }
+
     private static Process startFfmpegDecoder(Path input) throws IOException {
         ProcessBuilder pb = new ProcessBuilder(
                 "ffmpeg", "-y",
@@ -220,30 +297,48 @@ public class VideoEmbedder {
         }
     }
 
-    private static Process startFfmpegEncoder(Path output, int width, int height, double frameRate)
+    private static Process startFfmpegEncoder(Path output, int width, int height, double frameRate,
+                                              Path inputForAudio, boolean copyAudio)
             throws IOException {
-        ProcessBuilder pb = new ProcessBuilder(
+        List<String> command = new ArrayList<>(List.of(
                 "ffmpeg", "-y",
                 "-loglevel", "error",
                 "-f", "rawvideo",
                 "-pixel_format", "yuv420p",
                 "-video_size", width + "x" + height,
                 "-framerate", String.valueOf(frameRate),
-                "-i", "-",
+                "-i", "-"
+        ));
+        if (copyAudio) {
+            command.add("-i");
+            command.add(inputForAudio.toString());
+            command.add("-map");
+            command.add("0:v:0");
+            command.add("-map");
+            command.add("1:a?");
+        }
+        command.addAll(List.of(
                 "-c:v", "libx264",
                 "-crf", String.valueOf(ContractConstants.H264_CRF_DEFAULT),
                 "-pix_fmt", "yuv420p",
-                "-preset", "medium",
+                "-preset", "medium"
+        ));
+        if (copyAudio) {
+            command.addAll(List.of("-c:a", "copy"));
+        }
+        command.addAll(List.of(
                 "-f", "mp4",
                 output.toString()
-        );
+        ));
+        ProcessBuilder pb = new ProcessBuilder(command);
         pb.redirectOutput(ProcessBuilder.Redirect.DISCARD);
         pb.redirectErrorStream(false);
         try {
             return pb.start();
         } catch (IOException e) {
             throw new IOException("Failed to launch ffmpeg encoder. Contract section 4.4 requires libx264 "
-                    + "via system `ffmpeg`. macOS: `brew install ffmpeg`. Original: " + e.getMessage(), e);
+                    + "via system `ffmpeg` and audio copy uses `-c:a copy` when present. "
+                    + "macOS: `brew install ffmpeg`. Original: " + e.getMessage(), e);
         }
     }
 

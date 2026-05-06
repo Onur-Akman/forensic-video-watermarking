@@ -169,12 +169,12 @@ class M3AdversarialRobustnessTest {
                 + "30s 1080p30 test asset in `M2VideoRoundtripTest` (compliance vs targets per section 10.0):\n\n");
         sb.append("| Metric | Compliance min | Target | M2 observed | Status |\n");
         sb.append("|---|---:|---:|---:|:---:|\n");
-        sb.append("| PSNR — every emitted frame | > 40.0 dB | > 45.0 dB | min 66.84 dB | ✅ |\n");
+        sb.append("| PSNR — every emitted frame | > 40.0 dB | > 45.0 dB | min 58.42 dB | ✅ |\n");
         sb.append("| `frames_psnr_violation` | 0 | 0 | 0 | ✅ |\n");
-        sb.append("| Processing time | ≤ 2× duration | ≤ 1.5× | 23.28s / 30.00s = 0.78× | ✅ |\n");
+        sb.append("| Processing time | ≤ 2× duration | ≤ 1.5× | 36.77s / 30.00s = 1.23× | ✅ |\n");
         sb.append("| Bit-perfect ID | true | true | true | ✅ |\n");
         sb.append("| `auth_tag_valid` | true | true | true | ✅ |\n");
-        sb.append("| M2 confidence | ≥ 0.90 | ≥ 0.95 | 1.00 | ✅ |\n\n");
+        sb.append("| M2 confidence | ≥ 0.90 | ≥ 0.95 | 0.97 | ✅ |\n\n");
 
         sb.append("## 4. M3 Adversarial Robustness Results\n\n");
         sb.append("**Source:** `output/deneme_watermarked.mp4` ");
@@ -186,9 +186,9 @@ class M3AdversarialRobustnessTest {
         sb.append("(`Roundtrip.extractFromVideoWithAlignmentSearch`); production extraction is "
                 + "`watermark-extractor` microservice (out of scope for this report).\n\n");
         sb.append("**Alignment search:** scale ∈ {0.85, 0.90, 0.95, 1.00, 1.05}, "
-                + "offsetX/offsetY ∈ {−0.05, −0.025, 0, 0.025, 0.05} → 125 candidates; "
-                + "probe via first 10 frames; final extraction across up to 90 frames "
-                + "(contract section 5.3 recommendation).\n\n");
+                + "offsetX/offsetY ∈ {−0.05, −0.025, −0.005, −0.0025, 0, 0.0025, 0.005, 0.025, 0.05}; "
+                + "both contract-snapped and embed-snapped mappings are scored across up to 90 cached frames "
+                + "(810 candidates total, contract section 5.3 recommendation).\n\n");
 
         sb.append("| Attack | FFmpeg args | Output | Extracted ID | Confidence | Min req | Auth | Alignment (s, ox, oy) | Frames | Extract time | Pass |\n");
         sb.append("|---|---|---:|---|---:|---:|:---:|---|---:|---:|:---:|\n");
@@ -220,8 +220,8 @@ class M3AdversarialRobustnessTest {
         sb.append("- For the crop attack, alignment search converges to scale ≈ 0.90 with "
                 + "offset (0.05, 0.05) — the inverse of FFmpeg's `crop=iw*0.9:ih*0.9` centered crop "
                 + "(removes 5% from each border).\n");
-        sb.append("- Non-cropped attacks (bitrate, scale-down, color) naturally win at identity "
-                + "alignment (1.00, 0, 0) since their normalized cell positions are unchanged.\n");
+        sb.append("- Non-cropped attacks (bitrate, scale-down, color) converge to identity or "
+                + "near-identity subpixel alignment since their normalized cell positions are unchanged.\n");
         sb.append("- M3 extractor uses up to 90 frames per extraction (section 5.3 minimum) — "
                 + "well below the source's full duration but more than enough for high-confidence "
                 + "decoding given the 252-cell-per-frame redundancy.\n");

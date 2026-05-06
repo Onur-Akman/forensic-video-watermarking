@@ -1,6 +1,6 @@
 # Project Specter — Technical Report
 
-Generated: 2026-05-05T08:14:43.424804Z
+Generated: 2026-05-05T12:26:12.846073Z
 
 Spec referansi: `Project_Specter_Specification_v3.pdf` v1.0; contract: `docs/contract-new.md` v1.
 
@@ -32,29 +32,29 @@ M2 video pipeline acceptance was measured against the synthetic 30s 1080p30 test
 
 | Metric | Compliance min | Target | M2 observed | Status |
 |---|---:|---:|---:|:---:|
-| PSNR — every emitted frame | > 40.0 dB | > 45.0 dB | min 66.84 dB | ✅ |
+| PSNR — every emitted frame | > 40.0 dB | > 45.0 dB | min 58.42 dB | ✅ |
 | `frames_psnr_violation` | 0 | 0 | 0 | ✅ |
-| Processing time | ≤ 2× duration | ≤ 1.5× | 23.28s / 30.00s = 0.78× | ✅ |
+| Processing time | ≤ 2× duration | ≤ 1.5× | 36.77s / 30.00s = 1.23× | ✅ |
 | Bit-perfect ID | true | true | true | ✅ |
 | `auth_tag_valid` | true | true | true | ✅ |
-| M2 confidence | ≥ 0.90 | ≥ 0.95 | 1.00 | ✅ |
+| M2 confidence | ≥ 0.90 | ≥ 0.95 | 0.97 | ✅ |
 
 ## 4. M3 Adversarial Robustness Results
 
-**Source:** `output/deneme_watermarked.mp4` (1920x1080 @ 25.00 fps, video bitrate 3522 kbps, file 143.47 MB)
+**Source:** `output/deneme_watermarked.mp4` (1920x1080 @ 25.00 fps, video bitrate 3837 kbps, file 155.81 MB)
 **Embedded ID:** `0x5C2A91FE` (test seed, contract section 11).
 **Extractor:** internal blind decoder (`Roundtrip.extractFromVideoWithAlignmentSearch`); production extraction is `watermark-extractor` microservice (out of scope for this report).
 
-**Alignment search:** scale ∈ {0.85, 0.90, 0.95, 1.00, 1.05}, offsetX/offsetY ∈ {−0.05, −0.025, 0, 0.025, 0.05} → 125 candidates; probe via first 10 frames; final extraction across up to 90 frames (contract section 5.3 recommendation).
+**Alignment search:** scale ∈ {0.85, 0.90, 0.95, 1.00, 1.05}, offsetX/offsetY ∈ {−0.05, −0.025, −0.005, −0.0025, 0, 0.0025, 0.005, 0.025, 0.05}; both contract-snapped and embed-snapped mappings are scored across up to 90 cached frames (810 candidates total, contract section 5.3 recommendation).
 
 | Attack | FFmpeg args | Output | Extracted ID | Confidence | Min req | Auth | Alignment (s, ox, oy) | Frames | Extract time | Pass |
 |---|---|---:|---|---:|---:|:---:|---|---:|---:|:---:|
-| Bitrate -50% | `-b:v <half>` | 73.61 MB | `0x5C2A91FE` | 0.7860 | 0.85 | ✓ | (1.00, +0.000, +0.000) | 90 | 1.32s | ❌ |
-| 1080p -> 720p | `-vf scale=1280:720` | 57.88 MB | `0x6B1B7DA1` | 0.1481 | 0.85 | ✗ | (0.85, +0.000, -0.025) | 90 | 0.69s | ❌ |
-| 5% border crop | `-vf crop=iw*0.9:ih*0.9` | 88.95 MB | `0x5B2A91FE` | 0.3063 | 0.80 | ✗ | (0.90, +0.050, +0.050) | 90 | 0.74s | ❌ |
-| Brightness/contrast +-10% | `-vf eq=brightness=0.1:contrast=1.1` | 105.28 MB | `0x5C2A91FE` | 0.8836 | 0.85 | ✓ | (1.00, +0.000, +0.000) | 90 | 0.76s | ✅ |
+| Bitrate -50% | `-b:v <half>` | 79.66 MB | `0x5C2A91FE` | 0.9831 | 0.85 | ✓ | (1.00, -0.003, -0.003) | 90 | 13.66s | ✅ |
+| 1080p -> 720p | `-vf scale=1280:720` | 58.18 MB | `0x5C2A91FE` | 0.9701 | 0.85 | ✓ | (1.00, +0.000, -0.003) | 90 | 12.75s | ✅ |
+| 5% border crop | `-vf crop=iw*0.9:ih*0.9` | 89.67 MB | `0x5C2A91FE` | 0.8324 | 0.80 | ✓ | (0.90, +0.050, +0.050) | 90 | 13.41s | ✅ |
+| Brightness/contrast +-10% | `-vf eq=brightness=0.1:contrast=1.1` | 106.98 MB | `0x5C2A91FE` | 0.9957 | 0.85 | ✓ | (1.00, -0.003, -0.003) | 90 | 13.54s | ✅ |
 
-**Summary:** 1/4 attacks passed.
+**Summary:** 4/4 attacks passed.
 
 ---
 
@@ -62,5 +62,5 @@ M2 video pipeline acceptance was measured against the synthetic 30s 1080p30 test
 
 - Codec round-trip is part of every attack: outputs re-encoded with libx264, yuv420p, mp4 container; audio (when present) preserved via `-c:a copy`.
 - For the crop attack, alignment search converges to scale ≈ 0.90 with offset (0.05, 0.05) — the inverse of FFmpeg's `crop=iw*0.9:ih*0.9` centered crop (removes 5% from each border).
-- Non-cropped attacks (bitrate, scale-down, color) naturally win at identity alignment (1.00, 0, 0) since their normalized cell positions are unchanged.
+- Non-cropped attacks (bitrate, scale-down, color) converge to identity or near-identity subpixel alignment since their normalized cell positions are unchanged.
 - M3 extractor uses up to 90 frames per extraction (section 5.3 minimum) — well below the source's full duration but more than enough for high-confidence decoding given the 252-cell-per-frame redundancy.

@@ -27,8 +27,9 @@ Thumbs.db
 logs/
 
 # Runtime media outputs (contract §7)
+/output/
 *.mp4
-!shared/test-vectors/**/*.mp4
+!shared/test-vectors/m2_sample/*.mp4
 
 # Embedder runtime output volume
 shared/data/embedded/*
@@ -36,4 +37,3 @@ shared/data/embedded/*
 
 # User-local test scratch (WatermarkImageTool inputs/outputs)
 /input/
-/output/
