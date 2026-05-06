@@ -1,0 +1,38 @@
+{
+  "schema_version" : 1,
+  "contract_version" : "v1",
+  "name" : "auth_tag",
+  "description" : "16-bit truncated HMAC-SHA256 auth tag (contract section 1) for representative watermark ids.",
+  "generated_by" : "TestVectorGenerator",
+  "vectors" : [ {
+    "id" : "authtag_id_0x5C2A91FE",
+    "description" : "test seed (contract section 11)",
+    "input" : {
+      "auth_key_hex" : "71148fca12302ab57d798579ba2387ff0e7ebc413ad65bdf9160251033acc92e",
+      "watermark_id_hex" : "0x5C2A91FE"
+    },
+    "expected" : {
+      "tag_hex" : "fbf9"
+    }
+  }, {
+    "id" : "authtag_id_0x00000000",
+    "description" : "min unsigned 32-bit",
+    "input" : {
+      "auth_key_hex" : "71148fca12302ab57d798579ba2387ff0e7ebc413ad65bdf9160251033acc92e",
+      "watermark_id_hex" : "0x00000000"
+    },
+    "expected" : {
+      "tag_hex" : "4999"
+    }
+  }, {
+    "id" : "authtag_id_0xFFFFFFFF",
+    "description" : "max unsigned 32-bit (verifies long->int two's complement cast)",
+    "input" : {
+      "auth_key_hex" : "71148fca12302ab57d798579ba2387ff0e7ebc413ad65bdf9160251033acc92e",
+      "watermark_id_hex" : "0xFFFFFFFF"
+    },
+    "expected" : {
+      "tag_hex" : "4dbb"
+    }
+  } ]
+}

@@ -1,0 +1,28 @@
+{
+  "schema_version" : 1,
+  "contract_version" : "v1",
+  "name" : "prng_permutation",
+  "description" : "Fisher-Yates permutation outputs (contract section 2.3) using interleave_key + interleaver context.",
+  "generated_by" : "TestVectorGenerator",
+  "vectors" : [ {
+    "id" : "permutation_84_interleaver",
+    "input" : {
+      "key_hex" : "3d1c5d28170317577ec376204f5c12f89ec73cfe416bc3510083012c68c3cc65",
+      "context_ascii" : "specter-v1/interleaver/84",
+      "n" : 84
+    },
+    "expected" : {
+      "permutation" : [ 19, 34, 79, 74, 82, 48, 39, 57, 26, 51, 59, 78, 55, 36, 77, 83, 75, 25, 2, 54, 46, 9, 80, 33, 18, 69, 30, 68, 29, 12, 4, 16, 5, 11, 23, 47, 27, 64, 43, 66, 65, 31, 52, 81, 40, 7, 53, 35, 58, 15, 17, 50, 22, 42, 76, 38, 0, 71, 41, 32, 60, 63, 49, 13, 21, 70, 72, 28, 45, 61, 1, 56, 20, 14, 24, 67, 10, 37, 62, 8, 6, 3, 73, 44 ]
+    }
+  }, {
+    "id" : "permutation_10_interleaver_eyeball",
+    "input" : {
+      "key_hex" : "3d1c5d28170317577ec376204f5c12f89ec73cfe416bc3510083012c68c3cc65",
+      "context_ascii" : "specter-v1/interleaver/84",
+      "n" : 10
+    },
+    "expected" : {
+      "permutation" : [ 8, 6, 3, 1, 2, 9, 4, 7, 5, 0 ]
+    }
+  } ]
+}

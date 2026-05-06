@@ -1,0 +1,1803 @@
+{
+  "schema_version" : 1,
+  "contract_version" : "v1",
+  "name" : "dct_embed_points",
+  "description" : "Per-point DCT pair modulation traces from full embedIntoYPlane scenario (contract section 4.1, 4.2, 4.3). Each scenario: 1080p uniform-gray Y plane, test seed id 0x5C2A91FE. Vector 1 uses contract DELTA=12.0 and asserts the happy-path (252 modulation traces + frame psnr). Vector 2 uses an extreme delta to force PSNR < floor and asserts the skip path (yPlane reverted, embedded=false; contract section 10.2 path b).",
+  "generated_by" : "TestVectorGenerator",
+  "vectors" : [ {
+    "id" : "uniform_gray_1920x1080_id_0x5C2A91FE_delta_12",
+    "description" : "Happy path: contract DELTA=12.0; expect frame_skipped=false, PSNR > floor.",
+    "input" : {
+      "scenario" : "uniform_gray",
+      "frame_width" : 1920,
+      "frame_height" : 1080,
+      "y_fill" : 128,
+      "watermark_id_hex" : "0x5C2A91FE",
+      "delta" : 12.0
+    },
+    "expected" : {
+      "frame_skipped" : false,
+      "psnr_db" : 68.45555134746326,
+      "points" : [ {
+        "i" : 0,
+        "cell" : 130,
+        "pair_index" : 2,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 1,
+        "cell" : 1072,
+        "pair_index" : 3,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 2,
+        "cell" : 816,
+        "pair_index" : 2,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 3,
+        "cell" : 1036,
+        "pair_index" : 2,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 4,
+        "cell" : 738,
+        "pair_index" : 3,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 5,
+        "cell" : 138,
+        "pair_index" : 3,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 6,
+        "cell" : 1012,
+        "pair_index" : 0,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 7,
+        "cell" : 960,
+        "pair_index" : 2,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 8,
+        "cell" : 112,
+        "pair_index" : 3,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 9,
+        "cell" : 688,
+        "pair_index" : 3,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 10,
+        "cell" : 894,
+        "pair_index" : 1,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 11,
+        "cell" : 1047,
+        "pair_index" : 3,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 12,
+        "cell" : 815,
+        "pair_index" : 0,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 13,
+        "cell" : 942,
+        "pair_index" : 3,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 14,
+        "cell" : 567,
+        "pair_index" : 2,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 15,
+        "cell" : 606,
+        "pair_index" : 0,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 16,
+        "cell" : 60,
+        "pair_index" : 1,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 17,
+        "cell" : 934,
+        "pair_index" : 1,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 18,
+        "cell" : 1114,
+        "pair_index" : 1,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 19,
+        "cell" : 479,
+        "pair_index" : 2,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 20,
+        "cell" : 888,
+        "pair_index" : 0,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 21,
+        "cell" : 372,
+        "pair_index" : 1,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 22,
+        "cell" : 838,
+        "pair_index" : 3,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 23,
+        "cell" : 860,
+        "pair_index" : 0,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 24,
+        "cell" : 856,
+        "pair_index" : 1,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 25,
+        "cell" : 857,
+        "pair_index" : 1,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 26,
+        "cell" : 929,
+        "pair_index" : 1,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 27,
+        "cell" : 1276,
+        "pair_index" : 3,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 28,
+        "cell" : 453,
+        "pair_index" : 3,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 29,
+        "cell" : 873,
+        "pair_index" : 1,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 30,
+        "cell" : 1143,
+        "pair_index" : 0,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 31,
+        "cell" : 663,
+        "pair_index" : 3,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 32,
+        "cell" : 480,
+        "pair_index" : 2,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 33,
+        "cell" : 248,
+        "pair_index" : 2,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 34,
+        "cell" : 432,
+        "pair_index" : 2,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 35,
+        "cell" : 444,
+        "pair_index" : 2,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 36,
+        "cell" : 933,
+        "pair_index" : 1,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 37,
+        "cell" : 1104,
+        "pair_index" : 0,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 38,
+        "cell" : 312,
+        "pair_index" : 3,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 39,
+        "cell" : 585,
+        "pair_index" : 2,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 40,
+        "cell" : 1154,
+        "pair_index" : 3,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 41,
+        "cell" : 1274,
+        "pair_index" : 2,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 42,
+        "cell" : 539,
+        "pair_index" : 3,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 43,
+        "cell" : 730,
+        "pair_index" : 1,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 44,
+        "cell" : 787,
+        "pair_index" : 1,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 45,
+        "cell" : 765,
+        "pair_index" : 2,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 46,
+        "cell" : 107,
+        "pair_index" : 3,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 47,
+        "cell" : 1219,
+        "pair_index" : 3,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 48,
+        "cell" : 1010,
+        "pair_index" : 1,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 49,
+        "cell" : 621,
+        "pair_index" : 2,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 50,
+        "cell" : 287,
+        "pair_index" : 3,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 51,
+        "cell" : 306,
+        "pair_index" : 3,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 52,
+        "cell" : 950,
+        "pair_index" : 2,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 53,
+        "cell" : 729,
+        "pair_index" : 0,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 54,
+        "cell" : 538,
+        "pair_index" : 2,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 55,
+        "cell" : 15,
+        "pair_index" : 2,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 56,
+        "cell" : 76,
+        "pair_index" : 0,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 57,
+        "cell" : 448,
+        "pair_index" : 0,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 58,
+        "cell" : 160,
+        "pair_index" : 1,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 59,
+        "cell" : 952,
+        "pair_index" : 2,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 60,
+        "cell" : 1181,
+        "pair_index" : 1,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 61,
+        "cell" : 1251,
+        "pair_index" : 3,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 62,
+        "cell" : 433,
+        "pair_index" : 3,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 63,
+        "cell" : 1285,
+        "pair_index" : 3,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 64,
+        "cell" : 1058,
+        "pair_index" : 3,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 65,
+        "cell" : 977,
+        "pair_index" : 0,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 66,
+        "cell" : 284,
+        "pair_index" : 1,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 67,
+        "cell" : 1158,
+        "pair_index" : 3,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 68,
+        "cell" : 1284,
+        "pair_index" : 3,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 69,
+        "cell" : 1265,
+        "pair_index" : 2,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 70,
+        "cell" : 1157,
+        "pair_index" : 3,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 71,
+        "cell" : 658,
+        "pair_index" : 2,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 72,
+        "cell" : 1286,
+        "pair_index" : 3,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 73,
+        "cell" : 980,
+        "pair_index" : 0,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 74,
+        "cell" : 903,
+        "pair_index" : 3,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 75,
+        "cell" : 389,
+        "pair_index" : 1,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 76,
+        "cell" : 580,
+        "pair_index" : 1,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 77,
+        "cell" : 27,
+        "pair_index" : 2,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 78,
+        "cell" : 367,
+        "pair_index" : 3,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 79,
+        "cell" : 571,
+        "pair_index" : 0,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 80,
+        "cell" : 50,
+        "pair_index" : 0,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 81,
+        "cell" : 616,
+        "pair_index" : 1,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 82,
+        "cell" : 709,
+        "pair_index" : 2,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 83,
+        "cell" : 532,
+        "pair_index" : 0,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 84,
+        "cell" : 427,
+        "pair_index" : 0,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 85,
+        "cell" : 600,
+        "pair_index" : 0,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 86,
+        "cell" : 457,
+        "pair_index" : 0,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 87,
+        "cell" : 686,
+        "pair_index" : 2,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 88,
+        "cell" : 384,
+        "pair_index" : 2,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 89,
+        "cell" : 562,
+        "pair_index" : 1,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 90,
+        "cell" : 1124,
+        "pair_index" : 1,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 91,
+        "cell" : 869,
+        "pair_index" : 0,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 92,
+        "cell" : 277,
+        "pair_index" : 2,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 93,
+        "cell" : 25,
+        "pair_index" : 3,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 94,
+        "cell" : 1242,
+        "pair_index" : 1,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 95,
+        "cell" : 802,
+        "pair_index" : 1,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 96,
+        "cell" : 659,
+        "pair_index" : 0,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 97,
+        "cell" : 350,
+        "pair_index" : 3,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 98,
+        "cell" : 307,
+        "pair_index" : 3,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 99,
+        "cell" : 780,
+        "pair_index" : 0,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 100,
+        "cell" : 556,
+        "pair_index" : 1,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 101,
+        "cell" : 932,
+        "pair_index" : 0,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 102,
+        "cell" : 349,
+        "pair_index" : 1,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 103,
+        "cell" : 108,
+        "pair_index" : 2,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 104,
+        "cell" : 619,
+        "pair_index" : 0,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 105,
+        "cell" : 714,
+        "pair_index" : 0,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 106,
+        "cell" : 733,
+        "pair_index" : 2,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 107,
+        "cell" : 217,
+        "pair_index" : 3,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 108,
+        "cell" : 1151,
+        "pair_index" : 0,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 109,
+        "cell" : 460,
+        "pair_index" : 1,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 110,
+        "cell" : 245,
+        "pair_index" : 0,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 111,
+        "cell" : 867,
+        "pair_index" : 0,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 112,
+        "cell" : 231,
+        "pair_index" : 0,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 113,
+        "cell" : 935,
+        "pair_index" : 2,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 114,
+        "cell" : 355,
+        "pair_index" : 0,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 115,
+        "cell" : 38,
+        "pair_index" : 0,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 116,
+        "cell" : 1130,
+        "pair_index" : 3,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 117,
+        "cell" : 402,
+        "pair_index" : 1,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 118,
+        "cell" : 593,
+        "pair_index" : 1,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 119,
+        "cell" : 188,
+        "pair_index" : 3,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 120,
+        "cell" : 989,
+        "pair_index" : 1,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 121,
+        "cell" : 233,
+        "pair_index" : 2,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 122,
+        "cell" : 276,
+        "pair_index" : 0,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 123,
+        "cell" : 1013,
+        "pair_index" : 1,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 124,
+        "cell" : 986,
+        "pair_index" : 3,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 125,
+        "cell" : 122,
+        "pair_index" : 2,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 126,
+        "cell" : 452,
+        "pair_index" : 2,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 127,
+        "cell" : 85,
+        "pair_index" : 1,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 128,
+        "cell" : 296,
+        "pair_index" : 3,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 129,
+        "cell" : 745,
+        "pair_index" : 3,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 130,
+        "cell" : 1168,
+        "pair_index" : 1,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 131,
+        "cell" : 105,
+        "pair_index" : 0,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 132,
+        "cell" : 846,
+        "pair_index" : 1,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 133,
+        "cell" : 488,
+        "pair_index" : 0,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 134,
+        "cell" : 702,
+        "pair_index" : 3,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 135,
+        "cell" : 1207,
+        "pair_index" : 2,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 136,
+        "cell" : 413,
+        "pair_index" : 1,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 137,
+        "cell" : 591,
+        "pair_index" : 2,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 138,
+        "cell" : 930,
+        "pair_index" : 0,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 139,
+        "cell" : 674,
+        "pair_index" : 2,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 140,
+        "cell" : 994,
+        "pair_index" : 0,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 141,
+        "cell" : 1232,
+        "pair_index" : 2,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 142,
+        "cell" : 908,
+        "pair_index" : 3,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 143,
+        "cell" : 362,
+        "pair_index" : 1,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 144,
+        "cell" : 256,
+        "pair_index" : 0,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 145,
+        "cell" : 185,
+        "pair_index" : 1,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 146,
+        "cell" : 483,
+        "pair_index" : 1,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 147,
+        "cell" : 1291,
+        "pair_index" : 0,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 148,
+        "cell" : 263,
+        "pair_index" : 1,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 149,
+        "cell" : 1195,
+        "pair_index" : 1,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 150,
+        "cell" : 379,
+        "pair_index" : 0,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 151,
+        "cell" : 216,
+        "pair_index" : 2,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 152,
+        "cell" : 72,
+        "pair_index" : 2,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 153,
+        "cell" : 264,
+        "pair_index" : 0,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 154,
+        "cell" : 595,
+        "pair_index" : 0,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 155,
+        "cell" : 388,
+        "pair_index" : 0,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 156,
+        "cell" : 772,
+        "pair_index" : 1,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 157,
+        "cell" : 646,
+        "pair_index" : 2,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 158,
+        "cell" : 1244,
+        "pair_index" : 2,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 159,
+        "cell" : 370,
+        "pair_index" : 3,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 160,
+        "cell" : 978,
+        "pair_index" : 0,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 161,
+        "cell" : 559,
+        "pair_index" : 2,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 162,
+        "cell" : 1022,
+        "pair_index" : 3,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 163,
+        "cell" : 1172,
+        "pair_index" : 0,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 164,
+        "cell" : 516,
+        "pair_index" : 0,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 165,
+        "cell" : 459,
+        "pair_index" : 0,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 166,
+        "cell" : 139,
+        "pair_index" : 3,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 167,
+        "cell" : 1026,
+        "pair_index" : 1,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 168,
+        "cell" : 305,
+        "pair_index" : 0,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 169,
+        "cell" : 1161,
+        "pair_index" : 1,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 170,
+        "cell" : 1077,
+        "pair_index" : 1,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 171,
+        "cell" : 383,
+        "pair_index" : 1,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 172,
+        "cell" : 953,
+        "pair_index" : 0,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 173,
+        "cell" : 439,
+        "pair_index" : 2,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 174,
+        "cell" : 1225,
+        "pair_index" : 1,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 175,
+        "cell" : 1054,
+        "pair_index" : 1,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 176,
+        "cell" : 398,
+        "pair_index" : 2,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 177,
+        "cell" : 249,
+        "pair_index" : 0,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 178,
+        "cell" : 1044,
+        "pair_index" : 3,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 179,
+        "cell" : 69,
+        "pair_index" : 3,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 180,
+        "cell" : 948,
+        "pair_index" : 3,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 181,
+        "cell" : 298,
+        "pair_index" : 1,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 182,
+        "cell" : 1021,
+        "pair_index" : 3,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 183,
+        "cell" : 442,
+        "pair_index" : 2,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 184,
+        "cell" : 1254,
+        "pair_index" : 1,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 185,
+        "cell" : 157,
+        "pair_index" : 0,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 186,
+        "cell" : 359,
+        "pair_index" : 3,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 187,
+        "cell" : 148,
+        "pair_index" : 3,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 188,
+        "cell" : 16,
+        "pair_index" : 0,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 189,
+        "cell" : 786,
+        "pair_index" : 3,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 190,
+        "cell" : 430,
+        "pair_index" : 3,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 191,
+        "cell" : 651,
+        "pair_index" : 0,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 192,
+        "cell" : 782,
+        "pair_index" : 2,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 193,
+        "cell" : 1206,
+        "pair_index" : 2,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 194,
+        "cell" : 837,
+        "pair_index" : 3,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 195,
+        "cell" : 719,
+        "pair_index" : 1,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 196,
+        "cell" : 1174,
+        "pair_index" : 1,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 197,
+        "cell" : 335,
+        "pair_index" : 3,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 198,
+        "cell" : 592,
+        "pair_index" : 1,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 199,
+        "cell" : 82,
+        "pair_index" : 2,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 200,
+        "cell" : 947,
+        "pair_index" : 2,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 201,
+        "cell" : 534,
+        "pair_index" : 3,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 202,
+        "cell" : 1092,
+        "pair_index" : 2,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 203,
+        "cell" : 527,
+        "pair_index" : 2,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 204,
+        "cell" : 289,
+        "pair_index" : 1,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 205,
+        "cell" : 1292,
+        "pair_index" : 2,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 206,
+        "cell" : 158,
+        "pair_index" : 2,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 207,
+        "cell" : 734,
+        "pair_index" : 0,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 208,
+        "cell" : 490,
+        "pair_index" : 3,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 209,
+        "cell" : 192,
+        "pair_index" : 0,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 210,
+        "cell" : 62,
+        "pair_index" : 2,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 211,
+        "cell" : 218,
+        "pair_index" : 2,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 212,
+        "cell" : 1068,
+        "pair_index" : 2,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 213,
+        "cell" : 55,
+        "pair_index" : 2,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 214,
+        "cell" : 1175,
+        "pair_index" : 3,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 215,
+        "cell" : 214,
+        "pair_index" : 1,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 216,
+        "cell" : 1112,
+        "pair_index" : 1,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 217,
+        "cell" : 1005,
+        "pair_index" : 3,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 218,
+        "cell" : 1041,
+        "pair_index" : 1,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 219,
+        "cell" : 1039,
+        "pair_index" : 2,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 220,
+        "cell" : 447,
+        "pair_index" : 3,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 221,
+        "cell" : 63,
+        "pair_index" : 3,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 222,
+        "cell" : 691,
+        "pair_index" : 3,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 223,
+        "cell" : 10,
+        "pair_index" : 1,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 224,
+        "cell" : 396,
+        "pair_index" : 3,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 225,
+        "cell" : 1048,
+        "pair_index" : 1,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 226,
+        "cell" : 409,
+        "pair_index" : 3,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 227,
+        "cell" : 1141,
+        "pair_index" : 2,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 228,
+        "cell" : 768,
+        "pair_index" : 3,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 229,
+        "cell" : 93,
+        "pair_index" : 2,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 230,
+        "cell" : 177,
+        "pair_index" : 0,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 231,
+        "cell" : 1159,
+        "pair_index" : 2,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 232,
+        "cell" : 1116,
+        "pair_index" : 2,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 233,
+        "cell" : 1247,
+        "pair_index" : 3,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 234,
+        "cell" : 1056,
+        "pair_index" : 2,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 235,
+        "cell" : 1040,
+        "pair_index" : 3,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 236,
+        "cell" : 834,
+        "pair_index" : 1,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 237,
+        "cell" : 685,
+        "pair_index" : 0,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 238,
+        "cell" : 1149,
+        "pair_index" : 3,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 239,
+        "cell" : 1185,
+        "pair_index" : 0,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 240,
+        "cell" : 630,
+        "pair_index" : 0,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 241,
+        "cell" : 489,
+        "pair_index" : 3,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 242,
+        "cell" : 1204,
+        "pair_index" : 1,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 243,
+        "cell" : 461,
+        "pair_index" : 0,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 244,
+        "cell" : 924,
+        "pair_index" : 0,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 245,
+        "cell" : 316,
+        "pair_index" : 2,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 246,
+        "cell" : 549,
+        "pair_index" : 1,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 247,
+        "cell" : 66,
+        "pair_index" : 2,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 248,
+        "cell" : 694,
+        "pair_index" : 3,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 249,
+        "cell" : 1224,
+        "pair_index" : 0,
+        "bit" : 0,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ -6.0, 6.0 ]
+      }, {
+        "i" : 250,
+        "cell" : 937,
+        "pair_index" : 3,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      }, {
+        "i" : 251,
+        "cell" : 845,
+        "pair_index" : 1,
+        "bit" : 1,
+        "before" : [ 0.0, 0.0 ],
+        "after" : [ 6.0, -6.0 ]
+      } ]
+    }
+  }, {
+    "id" : "uniform_gray_1920x1080_id_0x5C2A91FE_delta_800_skip",
+    "description" : "Skip path: extreme DELTA=800 forces PSNR < floor; expect frame_skipped=true, yPlane reverted to original.",
+    "input" : {
+      "scenario" : "uniform_gray",
+      "frame_width" : 1920,
+      "frame_height" : 1080,
+      "y_fill" : 128,
+      "watermark_id_hex" : "0x5C2A91FE",
+      "delta" : 800.0
+    },
+    "expected" : {
+      "frame_skipped" : true,
+      "psnr_db" : 32.35206634260297
+    }
+  } ]
+}

@@ -1,0 +1,50 @@
+# ============================================
+# Specter Extraction Service Configuration
+# ============================================
+server:
+  port: 8082
+
+spring:
+  application:
+    name: specter-extraction-service
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 2GB
+      max-request-size: 2GB
+
+# ============================================
+# Watermark Configuration (Inter-Service Contract v1)
+# ============================================
+# Note: Cryptographic keys and PRNG configs are injected via 
+# SpectreKeyProvider.java and WatermarkConfig.java directly from 
+# environment variables as dictated by Contract §9.
+# The master key MUST be provided via SPECTER_WM_KEY env var.
+
+# ============================================
+# Upload / Processing Configuration
+# ============================================
+extraction:
+  upload-dir: ${UPLOAD_DIR:./uploads}
+  # Maximum concurrent processing tasks
+  max-concurrent-tasks: 4
+
+# ============================================
+# Logging
+# ============================================
+logging:
+  level:
+    com.specter.extraction: DEBUG
+    root: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+---
+# Docker profile overrides
+spring:
+  config:
+    activate:
+      on-profile: docker
+
+extraction:
+  upload-dir: /app/uploads

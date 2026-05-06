@@ -1,0 +1,69 @@
+services:
+  # ==============================================
+  # Extraction Service (Forensic Decoder) — Yaren
+  # ==============================================
+  watermark-extractor:
+    build:
+      context: ./watermark-extractor
+      dockerfile: Dockerfile
+    container_name: specter-extractor
+    ports:
+      - "8082:8082"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SERVER_PORT=8082
+      - SPECTER_WM_KEY=00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff
+      - EXTRACTOR_MAX_FRAMES=90
+      - UPLOAD_DIR=/app/uploads
+    volumes:
+      - extraction-uploads:/app/uploads
+    networks:
+      - specter-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8082/api/v1/info"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ==============================================
+  # Embedding Service (Watermark Encoder) — Arkadaş
+  # ==============================================
+  # embedding-service:
+  #   build:
+  #     context: ./embedding-service
+  #     dockerfile: Dockerfile
+  #   container_name: specter-embedding
+  #   ports:
+  #     - "8080:8080"
+  #   environment:
+  #     - SPRING_PROFILES_ACTIVE=docker
+  #     - WATERMARK_SECRET_KEY=default-specter-key-256bit-hex-encoded
+  #   networks:
+  #     - specter-network
+  #   restart: unless-stopped
+
+  # ==============================================
+  # Frontend Client (Angular UI)
+  # ==============================================
+  specter-frontend:
+    build:
+      context: ./specter-client
+      dockerfile: Dockerfile
+    container_name: specter-frontend
+    ports:
+      - "4200:80"
+    networks:
+      - specter-network
+    depends_on:
+      - watermark-extractor
+    restart: unless-stopped
+volumes:
+  extraction-uploads:
+    driver: local
+
+
+networks:
+  specter-network:
+    driver: bridge
