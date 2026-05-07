@@ -66,7 +66,7 @@
             <version>6.1.1-1.5.10</version>
             <classifier>linux-arm64</classifier>
         </dependency>
-        <!-- macOS host development (Apple Silicon) -->
+        <!-- macOS native libraries for local development/testing -->
         <dependency>
             <groupId>org.bytedeco</groupId>
             <artifactId>ffmpeg</artifactId>

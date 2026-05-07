@@ -14,17 +14,11 @@ public class GridUtils {
     public static final int EMBED_H = 1080;
 
     public enum MappingMode {
-        EXTRACT_SNAPPED, // Snap to 8-pixel grid of CURRENT resolution (Naive)
-        EMBED_SNAPPED    // Snap to 8-pixel grid of 1080p and project (Contract-compliant)
+        EXTRACT_SNAPPED,     // Snap to 8-pixel grid of CURRENT resolution (Naive)
+        EMBED_SNAPPED,       // Snap to 8-pixel grid of 1080p and project (Contract-compliant)
+        CROP_CENTER_SNAPPED  // Snap to 1080p grid, then apply center-crop offset (for adversarial crop)
     }
 
-    /**
-     * Affine alignment convention (contract §5.3): {@code embed_norm = scale * extract_norm + offset}
-     * → solve for the extract-frame coordinate as {@code extract_norm = (embed_norm - offset) / scale}.
-     * {@code offsetX} / {@code offsetY} are in **normalized [0,1] space** (not pixels), matching the
-     * contract's example range ({-0.025, 0, +0.025}). Crop {@code iw*0.9:ih*0.9} then resolves to
-     * (scale = 0.90, offset = +0.05).
-     */
     public static double[] getBlockCoordinates(
             int cellIndex, int frameWidth, int frameHeight,
             double scale, double offsetX, double offsetY, MappingMode mode) {
@@ -37,7 +31,23 @@ public class GridUtils {
         double yNormEmbed = WatermarkConfig.SAFE_MARGIN
                 + (row + 0.5) * (1.0 - 2.0 * WatermarkConfig.SAFE_MARGIN) / WatermarkConfig.GRID_ROWS;
 
-        if (mode == MappingMode.EXTRACT_SNAPPED) {
+        if (mode == MappingMode.CROP_CENTER_SNAPPED) {
+            // Center-crop: snap at 1080p, then subtract crop offset
+            long xPixEmbed = Math.round(xNormEmbed * EMBED_W);
+            long yPixEmbed = Math.round(yNormEmbed * EMBED_H);
+            double blockXEmbed = (double) (xPixEmbed / 8) * 8;
+            double blockYEmbed = (double) (yPixEmbed / 8) * 8;
+            
+            // FFmpeg center-crop offset: (original - cropped) / 2
+            double cropOffsetX = (EMBED_W - frameWidth) / 2.0;
+            double cropOffsetY = (EMBED_H - frameHeight) / 2.0;
+            
+            // Apply scale/offset search around the center-cropped coordinate
+            double blockX = (blockXEmbed - cropOffsetX - (offsetX * frameWidth)) / scale;
+            double blockY = (blockYEmbed - cropOffsetY - (offsetY * frameHeight)) / scale;
+            
+            return new double[]{blockX, blockY};
+        } else if (mode == MappingMode.EXTRACT_SNAPPED) {
             double xNormExtract = (xNormEmbed - offsetX) / scale;
             double yNormExtract = (yNormEmbed - offsetY) / scale;
             long xPix = Math.round(xNormExtract * frameWidth);

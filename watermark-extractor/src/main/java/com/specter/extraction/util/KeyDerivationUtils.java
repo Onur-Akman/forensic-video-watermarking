@@ -39,6 +39,9 @@ public final class KeyDerivationUtils {
     public static byte[] loadMasterKey() {
         String raw = System.getenv("SPECTER_WM_KEY");
         if (raw == null || raw.isBlank()) {
+            raw = System.getProperty("SPECTER_WM_KEY");
+        }
+        if (raw == null || raw.isBlank()) {
             throw new IllegalStateException(
                     "SPECTER_WM_KEY environment variable is not set. " +
                     "Service cannot start without the master watermark key.");

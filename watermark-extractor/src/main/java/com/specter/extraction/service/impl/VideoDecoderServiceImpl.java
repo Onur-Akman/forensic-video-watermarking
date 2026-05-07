@@ -6,7 +6,6 @@ import com.specter.extraction.model.FrameData;
 import com.specter.extraction.service.VideoDecoderService;
 import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.Frame;
-import org.bytedeco.javacv.FrameGrabber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -19,16 +18,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-import static org.bytedeco.ffmpeg.global.avutil.AV_PIX_FMT_YUV420P;
+import static org.bytedeco.ffmpeg.global.avutil.AV_PIX_FMT_GRAY8;
 
 /**
  * JavaCV-based VideoDecoderService.
  *
- * Two operating modes:
- *  1. decodeToFrames()  — buffers all frames in a List (for images / short clips).
- *  2. processFrames()   — streaming: each frame is decoded, handed to a Consumer,
- *                         then immediately GC-eligible.
- *                         Avoids OOM when processing 90 × 1080p frames simultaneously.
+ * Decodes video to luminance (Y) plane directly using AV_PIX_FMT_GRAY8,
+ * bypassing the lossy BGR → RGB → BT.601 Y conversion pipeline.
  */
 @Service
 public class VideoDecoderServiceImpl implements VideoDecoderService {
@@ -40,10 +36,6 @@ public class VideoDecoderServiceImpl implements VideoDecoderService {
     public VideoDecoderServiceImpl(AppConfig appConfig) {
         this.appConfig = appConfig;
     }
-
-    // ─────────────────────────────────────────────────────────────────
-    // Buffered decode — keeps all frames in memory
-    // ─────────────────────────────────────────────────────────────────
 
     @Override
     public List<FrameData> decodeToFrames(MultipartFile videoFile) {
@@ -73,10 +65,6 @@ public class VideoDecoderServiceImpl implements VideoDecoderService {
         }
     }
 
-    // ─────────────────────────────────────────────────────────────────
-    // Streaming decode — zero-copy accumulation, no OOM
-    // ─────────────────────────────────────────────────────────────────
-
     @Override
     public int processFrames(MultipartFile videoFile, Consumer<FrameData> consumer) {
         log.info("Streaming decode — file: {}, size: {} bytes",
@@ -91,25 +79,11 @@ public class VideoDecoderServiceImpl implements VideoDecoderService {
         }
     }
 
-    // ─────────────────────────────────────────────────────────────────
-    // Core grab loop — shared by all entry points
-    // ─────────────────────────────────────────────────────────────────
-
-    /**
-     * Decodes frames one by one, passing each to {@code consumer}.
-     * The luminance array is the only retained data; all RGB pixel buffers
-     * are discarded immediately after conversion, keeping GC pressure low.
-     *
-     * @return total number of successfully processed frames
-     */
     private int streamGrab(FFmpegFrameGrabber grabber, int maxFrames, Consumer<FrameData> consumer)
             throws Exception {
-        // Read directly in YUV420P so the Y plane comes from the decoder unmodified.
-        // Going through BGR + 0.299R+0.587G+0.114B re-derivation accumulates round-trip
-        // noise that survives M2 (clean signal) but pushes M3 attacks (especially crop)
-        // below the auth-tag decode threshold.
-        grabber.setImageMode(FrameGrabber.ImageMode.RAW);
-        grabber.setPixelFormat(AV_PIX_FMT_YUV420P);
+
+        // Request single-channel grayscale output → FFmpeg extracts Y plane directly
+        grabber.setPixelFormat(AV_PIX_FMT_GRAY8);
         grabber.start();
 
         int videoWidth  = grabber.getImageWidth();
@@ -117,8 +91,8 @@ public class VideoDecoderServiceImpl implements VideoDecoderService {
         double frameRate = grabber.getFrameRate();
         if (frameRate <= 0) frameRate = 30.0;
 
-        log.info(String.format("Video: %dx%d @ %.2f fps, maxFrames=%d",
-                videoWidth, videoHeight, frameRate, maxFrames));
+        log.info("Video: {}x{} @ {} fps, maxFrames={}, pixelFormat=GRAY8",
+                videoWidth, videoHeight, String.format("%.2f", frameRate), maxFrames);
 
         int frameIndex = 0;
         int processed  = 0;
@@ -126,34 +100,36 @@ public class VideoDecoderServiceImpl implements VideoDecoderService {
 
         while ((rawFrame = grabber.grabFrame(false, true, true, false)) != null && frameIndex < maxFrames) {
             try {
-                if (rawFrame.image == null || rawFrame.image.length == 0 || rawFrame.image[0] == null) {
+                if (rawFrame.image == null || rawFrame.image.length == 0) {
                     frameIndex++;
                     continue;
                 }
+
+                int stride = rawFrame.imageStride;
                 ByteBuffer yBuffer = (ByteBuffer) rawFrame.image[0];
-                int yStride = rawFrame.imageStride;
-                double[][] luminance = new double[videoHeight][videoWidth];
                 int origPos = yBuffer.position();
+                
                 try {
-                    for (int row = 0; row < videoHeight; row++) {
-                        int rowStart = row * yStride;
-                        for (int col = 0; col < videoWidth; col++) {
-                            luminance[row][col] = yBuffer.get(rowStart + col) & 0xFF;
+                    double[][] luminance = new double[videoHeight][videoWidth];
+                    for (int y = 0; y < videoHeight; y++) {
+                        int rowOffset = y * stride;
+                        for (int x = 0; x < videoWidth; x++) {
+                            luminance[y][x] = yBuffer.get(rowOffset + x) & 0xFF;
                         }
                     }
+
+                    consumer.accept(FrameData.builder()
+                            .frameIndex(frameIndex)
+                            .width(videoWidth)
+                            .height(videoHeight)
+                            .luminanceChannel(luminance)
+                            .timestampSeconds((double) frameIndex / frameRate)
+                            .build());
+
+                    processed++;
                 } finally {
                     yBuffer.position(origPos);
                 }
-
-                consumer.accept(FrameData.builder()
-                        .frameIndex(frameIndex)
-                        .width(videoWidth)
-                        .height(videoHeight)
-                        .luminanceChannel(luminance)
-                        .timestampSeconds((double) frameIndex / frameRate)
-                        .build());
-
-                processed++;
             } catch (Exception e) {
                 log.warn("Failed to process frame {}: {}", frameIndex, e.getMessage());
             }
@@ -161,12 +137,9 @@ public class VideoDecoderServiceImpl implements VideoDecoderService {
         }
 
         grabber.stop();
+        if (processed == 0) throw new VideoProcessingException("No frames decoded");
 
-        if (processed == 0) {
-            throw new VideoProcessingException("No frames could be decoded from the video");
-        }
-
-        log.info("Decoded {} frames (cap={})", processed, maxFrames);
+        log.info("Decoded {} frames", processed);
         return processed;
     }
 }
