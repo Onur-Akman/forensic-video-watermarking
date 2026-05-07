@@ -120,11 +120,29 @@ public final class ErrorCorrectionUtils {
     static int[] hammingDecode84(double[] codewordSoft84) {
         if (codewordSoft84.length != WatermarkConfig.CODEWORD_BITS)
             throw new IllegalArgumentException("Expected 84 codeword soft values");
+        // Soft maximum-likelihood decode: for each 7-bit nibble slot, score all 16
+        // candidate codewords against the soft vote vector and pick the highest. This
+        // beats hard-threshold + single-bit Hamming syndrome correction whenever two
+        // or more bits are weakly voted in the same nibble (e.g. M3 crop after
+        // re-encode), which the syndrome approach mis-corrects to a neighbouring
+        // codeword.
         int[] nibbles = new int[WatermarkConfig.RAW_PACKET_NIBBLES]; // 12
-        double[] nibbleSoft = new double[7];
         for (int n = 0; n < WatermarkConfig.RAW_PACKET_NIBBLES; n++) {
-            System.arraycopy(codewordSoft84, n * 7, nibbleSoft, 0, 7);
-            nibbles[n] = HammingCodec.decodeNibbleSoft(nibbleSoft);
+            int bestNibble = 0;
+            double bestScore = Double.NEGATIVE_INFINITY;
+            for (int candidate = 0; candidate < 16; candidate++) {
+                int[] encoded = HammingCodec.encodeNibble(candidate);
+                double score = 0.0;
+                for (int b = 0; b < 7; b++) {
+                    double vote = codewordSoft84[n * 7 + b];
+                    score += encoded[b] == 1 ? vote : -vote;
+                }
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestNibble = candidate;
+                }
+            }
+            nibbles[n] = bestNibble;
         }
         return nibbles;
     }

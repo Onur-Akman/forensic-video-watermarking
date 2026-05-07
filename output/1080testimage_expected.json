@@ -1,0 +1,1537 @@
+{
+  "schema_version" : 1,
+  "contract_version" : "v1",
+  "name" : "wm-image-tool-output",
+  "description" : "Real-content color image with watermark embedded via DCT pair modulation (contract section 4.2) on Y luma plane only; original Cb/Cr preserved. Output is a color PNG (RGB↔YCbCr roundtrip via BT.601 JFIF full-range). Extractor flow: load PNG → recompute Y from RGB → blind decode per contract section 5. Should match expected.watermark_id_hex bit-perfectly with auth_tag_valid=true. The cells[] gives per-cell after-embed vote sign (sign of a-b at the chosen DCT pair: +1 for embedded bit=1, -1 for bit=0). For real content the magnitude varies (cells with natural |a-b| ≥ DELTA are not modified by the embedder; section 4.2) but the sign should always match.",
+  "generated_by" : "WatermarkImageTool",
+  "input" : {
+    "image_file" : "1080testimage_watermarked.png",
+    "image_width" : 1920,
+    "image_height" : 1080,
+    "image_format" : "PNG, 24-bit RGB color",
+    "scenario" : "real_content_color_png",
+    "specter_wm_key_hex" : "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff",
+    "delta" : 12.0
+  },
+  "expected" : {
+    "watermark_id_hex" : "0x5C2A91FE",
+    "watermark_id_decimal" : 1546293758,
+    "auth_tag_valid" : true,
+    "bit_confidence_min" : 0.95,
+    "psnr_db" : 66.06292992255517,
+    "observed_confidence_post_rgb_roundtrip" : 1.0,
+    "cells" : [ {
+      "i" : 0,
+      "cell_index" : 130,
+      "pair_index" : 2,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 1,
+      "cell_index" : 1072,
+      "pair_index" : 3,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 2,
+      "cell_index" : 816,
+      "pair_index" : 2,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 3,
+      "cell_index" : 1036,
+      "pair_index" : 2,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 4,
+      "cell_index" : 738,
+      "pair_index" : 3,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 5,
+      "cell_index" : 138,
+      "pair_index" : 3,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 6,
+      "cell_index" : 1012,
+      "pair_index" : 0,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 7,
+      "cell_index" : 960,
+      "pair_index" : 2,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 8,
+      "cell_index" : 112,
+      "pair_index" : 3,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 9,
+      "cell_index" : 688,
+      "pair_index" : 3,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 10,
+      "cell_index" : 894,
+      "pair_index" : 1,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 11,
+      "cell_index" : 1047,
+      "pair_index" : 3,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 12,
+      "cell_index" : 815,
+      "pair_index" : 0,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 13,
+      "cell_index" : 942,
+      "pair_index" : 3,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 14,
+      "cell_index" : 567,
+      "pair_index" : 2,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 15,
+      "cell_index" : 606,
+      "pair_index" : 0,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 16,
+      "cell_index" : 60,
+      "pair_index" : 1,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 17,
+      "cell_index" : 934,
+      "pair_index" : 1,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 18,
+      "cell_index" : 1114,
+      "pair_index" : 1,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 19,
+      "cell_index" : 479,
+      "pair_index" : 2,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 20,
+      "cell_index" : 888,
+      "pair_index" : 0,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 21,
+      "cell_index" : 372,
+      "pair_index" : 1,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 22,
+      "cell_index" : 838,
+      "pair_index" : 3,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 23,
+      "cell_index" : 860,
+      "pair_index" : 0,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 24,
+      "cell_index" : 856,
+      "pair_index" : 1,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 25,
+      "cell_index" : 857,
+      "pair_index" : 1,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 26,
+      "cell_index" : 929,
+      "pair_index" : 1,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 27,
+      "cell_index" : 1276,
+      "pair_index" : 3,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 28,
+      "cell_index" : 453,
+      "pair_index" : 3,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 29,
+      "cell_index" : 873,
+      "pair_index" : 1,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 30,
+      "cell_index" : 1143,
+      "pair_index" : 0,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 31,
+      "cell_index" : 663,
+      "pair_index" : 3,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 32,
+      "cell_index" : 480,
+      "pair_index" : 2,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 33,
+      "cell_index" : 248,
+      "pair_index" : 2,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 34,
+      "cell_index" : 432,
+      "pair_index" : 2,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 35,
+      "cell_index" : 444,
+      "pair_index" : 2,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 36,
+      "cell_index" : 933,
+      "pair_index" : 1,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 37,
+      "cell_index" : 1104,
+      "pair_index" : 0,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 38,
+      "cell_index" : 312,
+      "pair_index" : 3,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 39,
+      "cell_index" : 585,
+      "pair_index" : 2,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 40,
+      "cell_index" : 1154,
+      "pair_index" : 3,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 41,
+      "cell_index" : 1274,
+      "pair_index" : 2,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 42,
+      "cell_index" : 539,
+      "pair_index" : 3,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 43,
+      "cell_index" : 730,
+      "pair_index" : 1,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 44,
+      "cell_index" : 787,
+      "pair_index" : 1,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 45,
+      "cell_index" : 765,
+      "pair_index" : 2,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 46,
+      "cell_index" : 107,
+      "pair_index" : 3,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 47,
+      "cell_index" : 1219,
+      "pair_index" : 3,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 48,
+      "cell_index" : 1010,
+      "pair_index" : 1,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 49,
+      "cell_index" : 621,
+      "pair_index" : 2,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 50,
+      "cell_index" : 287,
+      "pair_index" : 3,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 51,
+      "cell_index" : 306,
+      "pair_index" : 3,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 52,
+      "cell_index" : 950,
+      "pair_index" : 2,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 53,
+      "cell_index" : 729,
+      "pair_index" : 0,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 54,
+      "cell_index" : 538,
+      "pair_index" : 2,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 55,
+      "cell_index" : 15,
+      "pair_index" : 2,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 56,
+      "cell_index" : 76,
+      "pair_index" : 0,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 57,
+      "cell_index" : 448,
+      "pair_index" : 0,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 58,
+      "cell_index" : 160,
+      "pair_index" : 1,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 59,
+      "cell_index" : 952,
+      "pair_index" : 2,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 60,
+      "cell_index" : 1181,
+      "pair_index" : 1,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 61,
+      "cell_index" : 1251,
+      "pair_index" : 3,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 62,
+      "cell_index" : 433,
+      "pair_index" : 3,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 63,
+      "cell_index" : 1285,
+      "pair_index" : 3,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 64,
+      "cell_index" : 1058,
+      "pair_index" : 3,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 65,
+      "cell_index" : 977,
+      "pair_index" : 0,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 66,
+      "cell_index" : 284,
+      "pair_index" : 1,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 67,
+      "cell_index" : 1158,
+      "pair_index" : 3,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 68,
+      "cell_index" : 1284,
+      "pair_index" : 3,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 69,
+      "cell_index" : 1265,
+      "pair_index" : 2,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 70,
+      "cell_index" : 1157,
+      "pair_index" : 3,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 71,
+      "cell_index" : 658,
+      "pair_index" : 2,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 72,
+      "cell_index" : 1286,
+      "pair_index" : 3,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 73,
+      "cell_index" : 980,
+      "pair_index" : 0,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 74,
+      "cell_index" : 903,
+      "pair_index" : 3,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 75,
+      "cell_index" : 389,
+      "pair_index" : 1,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 76,
+      "cell_index" : 580,
+      "pair_index" : 1,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 77,
+      "cell_index" : 27,
+      "pair_index" : 2,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 78,
+      "cell_index" : 367,
+      "pair_index" : 3,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 79,
+      "cell_index" : 571,
+      "pair_index" : 0,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 80,
+      "cell_index" : 50,
+      "pair_index" : 0,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 81,
+      "cell_index" : 616,
+      "pair_index" : 1,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 82,
+      "cell_index" : 709,
+      "pair_index" : 2,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 83,
+      "cell_index" : 532,
+      "pair_index" : 0,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 84,
+      "cell_index" : 427,
+      "pair_index" : 0,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 85,
+      "cell_index" : 600,
+      "pair_index" : 0,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 86,
+      "cell_index" : 457,
+      "pair_index" : 0,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 87,
+      "cell_index" : 686,
+      "pair_index" : 2,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 88,
+      "cell_index" : 384,
+      "pair_index" : 2,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 89,
+      "cell_index" : 562,
+      "pair_index" : 1,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 90,
+      "cell_index" : 1124,
+      "pair_index" : 1,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 91,
+      "cell_index" : 869,
+      "pair_index" : 0,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 92,
+      "cell_index" : 277,
+      "pair_index" : 2,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 93,
+      "cell_index" : 25,
+      "pair_index" : 3,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 94,
+      "cell_index" : 1242,
+      "pair_index" : 1,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 95,
+      "cell_index" : 802,
+      "pair_index" : 1,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 96,
+      "cell_index" : 659,
+      "pair_index" : 0,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 97,
+      "cell_index" : 350,
+      "pair_index" : 3,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 98,
+      "cell_index" : 307,
+      "pair_index" : 3,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 99,
+      "cell_index" : 780,
+      "pair_index" : 0,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 100,
+      "cell_index" : 556,
+      "pair_index" : 1,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 101,
+      "cell_index" : 932,
+      "pair_index" : 0,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 102,
+      "cell_index" : 349,
+      "pair_index" : 1,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 103,
+      "cell_index" : 108,
+      "pair_index" : 2,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 104,
+      "cell_index" : 619,
+      "pair_index" : 0,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 105,
+      "cell_index" : 714,
+      "pair_index" : 0,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 106,
+      "cell_index" : 733,
+      "pair_index" : 2,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 107,
+      "cell_index" : 217,
+      "pair_index" : 3,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 108,
+      "cell_index" : 1151,
+      "pair_index" : 0,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 109,
+      "cell_index" : 460,
+      "pair_index" : 1,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 110,
+      "cell_index" : 245,
+      "pair_index" : 0,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 111,
+      "cell_index" : 867,
+      "pair_index" : 0,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 112,
+      "cell_index" : 231,
+      "pair_index" : 0,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 113,
+      "cell_index" : 935,
+      "pair_index" : 2,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 114,
+      "cell_index" : 355,
+      "pair_index" : 0,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 115,
+      "cell_index" : 38,
+      "pair_index" : 0,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 116,
+      "cell_index" : 1130,
+      "pair_index" : 3,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 117,
+      "cell_index" : 402,
+      "pair_index" : 1,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 118,
+      "cell_index" : 593,
+      "pair_index" : 1,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 119,
+      "cell_index" : 188,
+      "pair_index" : 3,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 120,
+      "cell_index" : 989,
+      "pair_index" : 1,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 121,
+      "cell_index" : 233,
+      "pair_index" : 2,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 122,
+      "cell_index" : 276,
+      "pair_index" : 0,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 123,
+      "cell_index" : 1013,
+      "pair_index" : 1,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 124,
+      "cell_index" : 986,
+      "pair_index" : 3,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 125,
+      "cell_index" : 122,
+      "pair_index" : 2,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 126,
+      "cell_index" : 452,
+      "pair_index" : 2,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 127,
+      "cell_index" : 85,
+      "pair_index" : 1,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 128,
+      "cell_index" : 296,
+      "pair_index" : 3,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 129,
+      "cell_index" : 745,
+      "pair_index" : 3,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 130,
+      "cell_index" : 1168,
+      "pair_index" : 1,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 131,
+      "cell_index" : 105,
+      "pair_index" : 0,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 132,
+      "cell_index" : 846,
+      "pair_index" : 1,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 133,
+      "cell_index" : 488,
+      "pair_index" : 0,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 134,
+      "cell_index" : 702,
+      "pair_index" : 3,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 135,
+      "cell_index" : 1207,
+      "pair_index" : 2,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 136,
+      "cell_index" : 413,
+      "pair_index" : 1,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 137,
+      "cell_index" : 591,
+      "pair_index" : 2,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 138,
+      "cell_index" : 930,
+      "pair_index" : 0,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 139,
+      "cell_index" : 674,
+      "pair_index" : 2,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 140,
+      "cell_index" : 994,
+      "pair_index" : 0,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 141,
+      "cell_index" : 1232,
+      "pair_index" : 2,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 142,
+      "cell_index" : 908,
+      "pair_index" : 3,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 143,
+      "cell_index" : 362,
+      "pair_index" : 1,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 144,
+      "cell_index" : 256,
+      "pair_index" : 0,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 145,
+      "cell_index" : 185,
+      "pair_index" : 1,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 146,
+      "cell_index" : 483,
+      "pair_index" : 1,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 147,
+      "cell_index" : 1291,
+      "pair_index" : 0,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 148,
+      "cell_index" : 263,
+      "pair_index" : 1,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 149,
+      "cell_index" : 1195,
+      "pair_index" : 1,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 150,
+      "cell_index" : 379,
+      "pair_index" : 0,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 151,
+      "cell_index" : 216,
+      "pair_index" : 2,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 152,
+      "cell_index" : 72,
+      "pair_index" : 2,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 153,
+      "cell_index" : 264,
+      "pair_index" : 0,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 154,
+      "cell_index" : 595,
+      "pair_index" : 0,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 155,
+      "cell_index" : 388,
+      "pair_index" : 0,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 156,
+      "cell_index" : 772,
+      "pair_index" : 1,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 157,
+      "cell_index" : 646,
+      "pair_index" : 2,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 158,
+      "cell_index" : 1244,
+      "pair_index" : 2,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 159,
+      "cell_index" : 370,
+      "pair_index" : 3,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 160,
+      "cell_index" : 978,
+      "pair_index" : 0,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 161,
+      "cell_index" : 559,
+      "pair_index" : 2,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 162,
+      "cell_index" : 1022,
+      "pair_index" : 3,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 163,
+      "cell_index" : 1172,
+      "pair_index" : 0,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 164,
+      "cell_index" : 516,
+      "pair_index" : 0,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 165,
+      "cell_index" : 459,
+      "pair_index" : 0,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 166,
+      "cell_index" : 139,
+      "pair_index" : 3,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 167,
+      "cell_index" : 1026,
+      "pair_index" : 1,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 168,
+      "cell_index" : 305,
+      "pair_index" : 0,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 169,
+      "cell_index" : 1161,
+      "pair_index" : 1,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 170,
+      "cell_index" : 1077,
+      "pair_index" : 1,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 171,
+      "cell_index" : 383,
+      "pair_index" : 1,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 172,
+      "cell_index" : 953,
+      "pair_index" : 0,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 173,
+      "cell_index" : 439,
+      "pair_index" : 2,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 174,
+      "cell_index" : 1225,
+      "pair_index" : 1,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 175,
+      "cell_index" : 1054,
+      "pair_index" : 1,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 176,
+      "cell_index" : 398,
+      "pair_index" : 2,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 177,
+      "cell_index" : 249,
+      "pair_index" : 0,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 178,
+      "cell_index" : 1044,
+      "pair_index" : 3,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 179,
+      "cell_index" : 69,
+      "pair_index" : 3,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 180,
+      "cell_index" : 948,
+      "pair_index" : 3,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 181,
+      "cell_index" : 298,
+      "pair_index" : 1,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 182,
+      "cell_index" : 1021,
+      "pair_index" : 3,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 183,
+      "cell_index" : 442,
+      "pair_index" : 2,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 184,
+      "cell_index" : 1254,
+      "pair_index" : 1,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 185,
+      "cell_index" : 157,
+      "pair_index" : 0,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 186,
+      "cell_index" : 359,
+      "pair_index" : 3,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 187,
+      "cell_index" : 148,
+      "pair_index" : 3,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 188,
+      "cell_index" : 16,
+      "pair_index" : 0,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 189,
+      "cell_index" : 786,
+      "pair_index" : 3,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 190,
+      "cell_index" : 430,
+      "pair_index" : 3,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 191,
+      "cell_index" : 651,
+      "pair_index" : 0,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 192,
+      "cell_index" : 782,
+      "pair_index" : 2,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 193,
+      "cell_index" : 1206,
+      "pair_index" : 2,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 194,
+      "cell_index" : 837,
+      "pair_index" : 3,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 195,
+      "cell_index" : 719,
+      "pair_index" : 1,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 196,
+      "cell_index" : 1174,
+      "pair_index" : 1,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 197,
+      "cell_index" : 335,
+      "pair_index" : 3,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 198,
+      "cell_index" : 592,
+      "pair_index" : 1,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 199,
+      "cell_index" : 82,
+      "pair_index" : 2,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 200,
+      "cell_index" : 947,
+      "pair_index" : 2,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 201,
+      "cell_index" : 534,
+      "pair_index" : 3,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 202,
+      "cell_index" : 1092,
+      "pair_index" : 2,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 203,
+      "cell_index" : 527,
+      "pair_index" : 2,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 204,
+      "cell_index" : 289,
+      "pair_index" : 1,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 205,
+      "cell_index" : 1292,
+      "pair_index" : 2,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 206,
+      "cell_index" : 158,
+      "pair_index" : 2,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 207,
+      "cell_index" : 734,
+      "pair_index" : 0,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 208,
+      "cell_index" : 490,
+      "pair_index" : 3,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 209,
+      "cell_index" : 192,
+      "pair_index" : 0,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 210,
+      "cell_index" : 62,
+      "pair_index" : 2,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 211,
+      "cell_index" : 218,
+      "pair_index" : 2,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 212,
+      "cell_index" : 1068,
+      "pair_index" : 2,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 213,
+      "cell_index" : 55,
+      "pair_index" : 2,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 214,
+      "cell_index" : 1175,
+      "pair_index" : 3,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 215,
+      "cell_index" : 214,
+      "pair_index" : 1,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 216,
+      "cell_index" : 1112,
+      "pair_index" : 1,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 217,
+      "cell_index" : 1005,
+      "pair_index" : 3,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 218,
+      "cell_index" : 1041,
+      "pair_index" : 1,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 219,
+      "cell_index" : 1039,
+      "pair_index" : 2,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 220,
+      "cell_index" : 447,
+      "pair_index" : 3,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 221,
+      "cell_index" : 63,
+      "pair_index" : 3,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 222,
+      "cell_index" : 691,
+      "pair_index" : 3,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 223,
+      "cell_index" : 10,
+      "pair_index" : 1,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 224,
+      "cell_index" : 396,
+      "pair_index" : 3,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 225,
+      "cell_index" : 1048,
+      "pair_index" : 1,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 226,
+      "cell_index" : 409,
+      "pair_index" : 3,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 227,
+      "cell_index" : 1141,
+      "pair_index" : 2,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 228,
+      "cell_index" : 768,
+      "pair_index" : 3,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 229,
+      "cell_index" : 93,
+      "pair_index" : 2,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 230,
+      "cell_index" : 177,
+      "pair_index" : 0,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 231,
+      "cell_index" : 1159,
+      "pair_index" : 2,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 232,
+      "cell_index" : 1116,
+      "pair_index" : 2,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 233,
+      "cell_index" : 1247,
+      "pair_index" : 3,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 234,
+      "cell_index" : 1056,
+      "pair_index" : 2,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 235,
+      "cell_index" : 1040,
+      "pair_index" : 3,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 236,
+      "cell_index" : 834,
+      "pair_index" : 1,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 237,
+      "cell_index" : 685,
+      "pair_index" : 0,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 238,
+      "cell_index" : 1149,
+      "pair_index" : 3,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 239,
+      "cell_index" : 1185,
+      "pair_index" : 0,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 240,
+      "cell_index" : 630,
+      "pair_index" : 0,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 241,
+      "cell_index" : 489,
+      "pair_index" : 3,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 242,
+      "cell_index" : 1204,
+      "pair_index" : 1,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 243,
+      "cell_index" : 461,
+      "pair_index" : 0,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 244,
+      "cell_index" : 924,
+      "pair_index" : 0,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 245,
+      "cell_index" : 316,
+      "pair_index" : 2,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 246,
+      "cell_index" : 549,
+      "pair_index" : 1,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 247,
+      "cell_index" : 66,
+      "pair_index" : 2,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 248,
+      "cell_index" : 694,
+      "pair_index" : 3,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 249,
+      "cell_index" : 1224,
+      "pair_index" : 0,
+      "embedded_bit" : 0,
+      "expected_vote_sign" : -1
+    }, {
+      "i" : 250,
+      "cell_index" : 937,
+      "pair_index" : 3,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    }, {
+      "i" : 251,
+      "cell_index" : 845,
+      "pair_index" : 1,
+      "embedded_bit" : 1,
+      "expected_vote_sign" : 1
+    } ]
+  }
+}

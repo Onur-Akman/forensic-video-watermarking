@@ -38,14 +38,18 @@ public class ConfidenceScoreServiceImpl implements ConfidenceScoreService {
 
         double totalConfidence = 0.0;
         for (int i = 0; i < cw; i++) {
-            // sum_votes_for_bit across 3 repetitions and N frames
-            // num = | sum_f (v_f,r1 + v_f,r2 + v_f,r3) |
-            // den = sum_f ( |v_f,r1| + |v_f,r2| + |v_f,r3| )
-            // Since we stored averages (sum/N), the N cancels out: (sum/N) / (sumAbs/N) = sum/sumAbs
-            
-            double num = Math.abs(softBits[i] + softBits[i + cw] + softBits[i + cw * 2]);
-            double den = absSoftBits[i] + absSoftBits[i + cw] + absSoftBits[i + cw * 2];
-
+            // Per-bit consolidation (contract §5.1 step 4 → §5.2):
+            //   1) sum frame votes within each repetition slot to get one value per slot
+            //   2) confidence = | sum_r (frame_sum_r) | / sum_r | frame_sum_r |
+            // Frame averaging-then-absolute (instead of per-frame absolute) is the
+            // matched-filter form: noise cancels across frames before magnitude is taken,
+            // matching the M3 acceptance thresholds (0.80–0.85). softBits[i] already holds
+            // the cross-frame sum for repetition i, so absSoftBits is no longer needed here.
+            double r0 = softBits[i];
+            double r1 = softBits[i + cw];
+            double r2 = softBits[i + cw * 2];
+            double num = Math.abs(r0 + r1 + r2);
+            double den = Math.abs(r0) + Math.abs(r1) + Math.abs(r2);
             if (den > 0) {
                 totalConfidence += (num / den);
             }

@@ -4,21 +4,22 @@ import com.specter.extraction.config.AppConfig;
 import com.specter.extraction.exception.VideoProcessingException;
 import com.specter.extraction.model.FrameData;
 import com.specter.extraction.service.VideoDecoderService;
-import com.specter.extraction.util.ColorSpaceUtils;
 import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.Frame;
-import org.bytedeco.javacv.Java2DFrameConverter;
+import org.bytedeco.javacv.FrameGrabber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+
+import static org.bytedeco.ffmpeg.global.avutil.AV_PIX_FMT_YUV420P;
 
 /**
  * JavaCV-based VideoDecoderService.
@@ -103,6 +104,12 @@ public class VideoDecoderServiceImpl implements VideoDecoderService {
      */
     private int streamGrab(FFmpegFrameGrabber grabber, int maxFrames, Consumer<FrameData> consumer)
             throws Exception {
+        // Read directly in YUV420P so the Y plane comes from the decoder unmodified.
+        // Going through BGR + 0.299R+0.587G+0.114B re-derivation accumulates round-trip
+        // noise that survives M2 (clean signal) but pushes M3 attacks (especially crop)
+        // below the auth-tag decode threshold.
+        grabber.setImageMode(FrameGrabber.ImageMode.RAW);
+        grabber.setPixelFormat(AV_PIX_FMT_YUV420P);
         grabber.start();
 
         int videoWidth  = grabber.getImageWidth();
@@ -110,33 +117,38 @@ public class VideoDecoderServiceImpl implements VideoDecoderService {
         double frameRate = grabber.getFrameRate();
         if (frameRate <= 0) frameRate = 30.0;
 
-        log.info("Video: {}x{} @ {:.2f} fps, maxFrames={}", videoWidth, videoHeight, frameRate, maxFrames);
+        log.info(String.format("Video: %dx%d @ %.2f fps, maxFrames=%d",
+                videoWidth, videoHeight, frameRate, maxFrames));
 
-        Java2DFrameConverter converter = new Java2DFrameConverter();
         int frameIndex = 0;
         int processed  = 0;
         Frame rawFrame;
 
-        while ((rawFrame = grabber.grabImage()) != null && frameIndex < maxFrames) {
+        while ((rawFrame = grabber.grabFrame(false, true, true, false)) != null && frameIndex < maxFrames) {
             try {
-                BufferedImage image = converter.convert(rawFrame);
-                if (image == null) {
-                    log.warn("Null frame at index {}, skipping", frameIndex);
+                if (rawFrame.image == null || rawFrame.image.length == 0 || rawFrame.image[0] == null) {
                     frameIndex++;
                     continue;
                 }
-
-                int w = image.getWidth();
-                int h = image.getHeight();
-
-                // Extract packed ARGB, convert to luminance — RGB buffer is then GC-eligible.
-                int[] rgbPixels = image.getRGB(0, 0, w, h, null, 0, w);
-                double[][] luminance = ColorSpaceUtils.extractLuminance(rgbPixels, w, h);
+                ByteBuffer yBuffer = (ByteBuffer) rawFrame.image[0];
+                int yStride = rawFrame.imageStride;
+                double[][] luminance = new double[videoHeight][videoWidth];
+                int origPos = yBuffer.position();
+                try {
+                    for (int row = 0; row < videoHeight; row++) {
+                        int rowStart = row * yStride;
+                        for (int col = 0; col < videoWidth; col++) {
+                            luminance[row][col] = yBuffer.get(rowStart + col) & 0xFF;
+                        }
+                    }
+                } finally {
+                    yBuffer.position(origPos);
+                }
 
                 consumer.accept(FrameData.builder()
                         .frameIndex(frameIndex)
-                        .width(w)
-                        .height(h)
+                        .width(videoWidth)
+                        .height(videoHeight)
                         .luminanceChannel(luminance)
                         .timestampSeconds((double) frameIndex / frameRate)
                         .build());

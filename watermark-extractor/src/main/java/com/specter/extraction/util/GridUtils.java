@@ -18,6 +18,13 @@ public class GridUtils {
         EMBED_SNAPPED    // Snap to 8-pixel grid of 1080p and project (Contract-compliant)
     }
 
+    /**
+     * Affine alignment convention (contract §5.3): {@code embed_norm = scale * extract_norm + offset}
+     * → solve for the extract-frame coordinate as {@code extract_norm = (embed_norm - offset) / scale}.
+     * {@code offsetX} / {@code offsetY} are in **normalized [0,1] space** (not pixels), matching the
+     * contract's example range ({-0.025, 0, +0.025}). Crop {@code iw*0.9:ih*0.9} then resolves to
+     * (scale = 0.90, offset = +0.05).
+     */
     public static double[] getBlockCoordinates(
             int cellIndex, int frameWidth, int frameHeight,
             double scale, double offsetX, double offsetY, MappingMode mode) {
@@ -25,30 +32,29 @@ public class GridUtils {
         int col = cellIndex % WatermarkConfig.GRID_COLS;
         int row = cellIndex / WatermarkConfig.GRID_COLS;
 
-        double xNormBase = WatermarkConfig.SAFE_MARGIN
+        double xNormEmbed = WatermarkConfig.SAFE_MARGIN
                 + (col + 0.5) * (1.0 - 2.0 * WatermarkConfig.SAFE_MARGIN) / WatermarkConfig.GRID_COLS;
-        double yNormBase = WatermarkConfig.SAFE_MARGIN
+        double yNormEmbed = WatermarkConfig.SAFE_MARGIN
                 + (row + 0.5) * (1.0 - 2.0 * WatermarkConfig.SAFE_MARGIN) / WatermarkConfig.GRID_ROWS;
 
-        double xNorm = (xNormBase - 0.5) * scale + 0.5;
-        double yNorm = (yNormBase - 0.5) * scale + 0.5;
-
         if (mode == MappingMode.EXTRACT_SNAPPED) {
-            // Naive snap at current resolution
-            long xPix = Math.round(xNorm * frameWidth);
-            long yPix = Math.round(yNorm * frameHeight);
+            double xNormExtract = (xNormEmbed - offsetX) / scale;
+            double yNormExtract = (yNormEmbed - offsetY) / scale;
+            long xPix = Math.round(xNormExtract * frameWidth);
+            long yPix = Math.round(yNormExtract * frameHeight);
             double blockX = (double) (xPix / 8) * 8;
             double blockY = (double) (yPix / 8) * 8;
-            return new double[]{blockX + offsetX, blockY + offsetY};
+            return new double[]{blockX, blockY};
         } else {
-            // Contract-compliant snap at 1080p
-            long xPixEmbed = Math.round(xNorm * EMBED_W);
-            long yPixEmbed = Math.round(yNorm * EMBED_H);
-            double blockXEmbed = (double) (xPixEmbed / 8) * 8;
-            double blockYEmbed = (double) (yPixEmbed / 8) * 8;
-            double blockX = blockXEmbed * (double) frameWidth  / EMBED_W;
-            double blockY = blockYEmbed * (double) frameHeight / EMBED_H;
-            return new double[]{blockX + offsetX, blockY + offsetY};
+            long xPixEmbed = Math.round(xNormEmbed * EMBED_W);
+            long yPixEmbed = Math.round(yNormEmbed * EMBED_H);
+            double xNormSnap = ((double) ((xPixEmbed / 8) * 8)) / EMBED_W;
+            double yNormSnap = ((double) ((yPixEmbed / 8) * 8)) / EMBED_H;
+            double xNormExtract = (xNormSnap - offsetX) / scale;
+            double yNormExtract = (yNormSnap - offsetY) / scale;
+            double blockX = xNormExtract * frameWidth;
+            double blockY = yNormExtract * frameHeight;
+            return new double[]{blockX, blockY};
         }
     }
 

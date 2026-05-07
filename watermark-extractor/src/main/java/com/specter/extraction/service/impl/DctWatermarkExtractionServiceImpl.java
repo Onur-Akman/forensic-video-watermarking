@@ -26,10 +26,17 @@ public class DctWatermarkExtractionServiceImpl implements WatermarkExtractionSer
 
     private static final Logger log = LoggerFactory.getLogger(DctWatermarkExtractionServiceImpl.class);
 
-    private static final double[] SEARCH_SCALES = { 0.85, 0.90, 0.95, 1.00, 1.05, 1.10 };
-    
-    private static final int SEARCH_FRAMES = 15;
-    private static final int REFINE_FRAMES = 45;
+    // Contract §5.3 alignment grid (offset is in normalized [0,1] space).
+    private static final double[] SEARCH_SCALES  = { 0.85, 0.90, 0.95, 1.00, 1.05 };
+    private static final double[] SEARCH_OFFSETS = {
+            -0.05, -0.025, -0.005, -0.0025, 0.0, 0.0025, 0.005, 0.025, 0.05
+    };
+
+    // Tier 2 candidates probed across the full sync window: 16-bit auth tag
+    // needs strong signal to validate; sub-15-frame probes routinely return
+    // valid=false at the *correct* alignment, leaving best stuck on identity.
+    private static final int SEARCH_FRAMES = 90;
+    private static final int REFINE_FRAMES = 90;
 
     private final VideoDecoderService         videoDecoderService;
     private final FrameSynchronizationService  frameSyncService;
@@ -87,14 +94,18 @@ public class DctWatermarkExtractionServiceImpl implements WatermarkExtractionSer
 
         // --- Multi-Mode Search ---
         Alignment best = searchForensic(sFrames, rFrames, block, dct);
-        
-        if (best == null || !best.valid) {
-            log.warn("Forensic search failed. Forcing EXTRACT_SNAPPED identity.");
+
+        if (best == null) {
             best = probe(syncFrames, 1.0, 0.0, 0.0, GridUtils.MappingMode.EXTRACT_SNAPPED, block, dct);
         }
+        // No identity fallback when best.valid is false: the search already preferred
+        // valid candidates, so a non-valid winner is the *highest-confidence* candidate
+        // overall (e.g. crop attack at scale=0.90, ox=oy=+0.05 may not pass auth on the
+        // 90-frame probe slice but still beats identity meaningfully).
 
-        log.info("Extraction Alignment: scale={} ox={:.1f} oy={:.1f} mode={} valid={} conf={:.4f}",
-                best.scale, best.ox, best.oy, best.mode, best.valid, best.conf);
+        log.info(String.format(
+                "Extraction Alignment: scale=%.2f ox=%+.4f oy=%+.4f mode=%s valid=%s conf=%.4f",
+                best.scale, best.ox, best.oy, best.mode, best.valid, best.conf));
 
         // --- Final Extraction ---
         SoftResult sr = extractSoftBilinear(syncFrames, best.scale, best.ox, best.oy, best.mode, block, dct);
@@ -118,21 +129,19 @@ public class DctWatermarkExtractionServiceImpl implements WatermarkExtractionSer
     private Alignment searchForensic(List<FrameData> sFrames, List<FrameData> rFrames, double[][] block, double[][] dct) {
         Alignment best = null;
 
-        // Tier 1: Identity checks
+        // Tier 1: identity-ish in both mapping modes (handles bitrate/scale-down/color attacks).
         for (GridUtils.MappingMode mode : GridUtils.MappingMode.values()) {
             Alignment id = probe(rFrames, 1.0, 0.0, 0.0, mode, block, dct);
             if (id.valid && id.conf >= 0.85) return id;
             if (better(id, best)) best = id;
         }
 
-        // Tier 2: Search across BOTH modes (covers pure crop and scale-then-crop)
+        // Tier 2: full normalized-space alignment grid across both modes (handles crop).
         for (GridUtils.MappingMode mode : GridUtils.MappingMode.values()) {
             for (double scale : SEARCH_SCALES) {
-                // Search ±160 pixels with step 16 (covers up to 16% crop/shift)
-                for (double ox = -160; ox <= 160; ox += 16) {
-                    for (double oy = -160; oy <= 160; oy += 16) {
-                        if (scale == 1.0 && ox == 0 && oy == 0) continue;
-                        
+                for (double ox : SEARCH_OFFSETS) {
+                    for (double oy : SEARCH_OFFSETS) {
+                        if (scale == 1.0 && ox == 0.0 && oy == 0.0) continue;
                         Alignment cand = probe(sFrames, scale, ox, oy, mode, block, dct);
                         if (better(cand, best)) {
                             best = cand;
@@ -150,22 +159,15 @@ public class DctWatermarkExtractionServiceImpl implements WatermarkExtractionSer
     }
 
     private Alignment refine(List<FrameData> frames, Alignment base, double[][] block, double[][] dct) {
+        // Sub-grid sweep around the winning offset (normalized space).
         Alignment best = base;
-        // Refine ±12px step 4, then ±4px step 1
-        for (double dx = -12; dx <= 12; dx += 4) {
-            for (double dy = -12; dy <= 12; dy += 4) {
+        for (double dx = -0.0025; dx <= 0.0025; dx += 0.00125) {
+            for (double dy = -0.0025; dy <= 0.0025; dy += 0.00125) {
                 Alignment cand = probe(frames, base.scale, base.ox + dx, base.oy + dy, base.mode, block, dct);
                 if (better(cand, best)) best = cand;
             }
         }
-        Alignment fBest = best;
-        for (double dx = -3; dx <= 3; dx += 1) {
-            for (double dy = -3; dy <= 3; dy += 1) {
-                Alignment cand = probe(frames, fBest.scale, fBest.ox + dx, fBest.oy + dy, fBest.mode, block, dct);
-                if (better(cand, fBest)) fBest = cand;
-            }
-        }
-        return fBest;
+        return best;
     }
 
     private Alignment probe(List<FrameData> frames, double scale, double ox, double oy, GridUtils.MappingMode mode, double[][] block, double[][] dct) {
