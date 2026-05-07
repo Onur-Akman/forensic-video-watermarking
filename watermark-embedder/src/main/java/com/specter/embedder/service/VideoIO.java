@@ -38,30 +38,4 @@ public class VideoIO {
         return tmp;
     }
 
-    public EmbedRunResult embedVideo(Path input, Path output, byte[] codeword84,
-                                     DctEmbedder embedder, int h264Crf) {
-        log.info("ffmpeg params: -c:v libx264 -crf {} -pix_fmt yuv420p -c:a copy in={} out={}",
-                h264Crf, input, output);
-        // TODO(M2): JavaCV decode/encode loop:
-        //   FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(input.toFile());
-        //   FFmpegFrameRecorder recorder = new FFmpegFrameRecorder(output.toFile(), w, h);
-        //   recorder.setVideoCodec(AV_CODEC_ID_H264);
-        //   recorder.setVideoOption("crf", String.valueOf(h264Crf));
-        //   recorder.setPixelFormat(AV_PIX_FMT_YUV420P);
-        //   loop frames -> YCbCr split -> embedder.embedIntoYPlane -> merge -> recorder.record
-        //   accumulate PSNR metrics, count frames_psnr_violation (PSNR < 40 dB)
-        throw new UnsupportedOperationException("VideoIO.embedVideo: not yet implemented (M2)");
-    }
-
-    /** Pipeline ic ciktisi - service katmani bunu EmbedMetrics'e cevirir. */
-    public record EmbedRunResult(
-            int framesProcessed,
-            int framesPsnrViolation,
-            double psnrAvgDb,
-            double psnrMinDb,
-            double mseAvg,
-            double mseMax,
-            double durationSec
-    ) {
-    }
 }

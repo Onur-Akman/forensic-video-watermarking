@@ -17,6 +17,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
 
+
 /**
  * Top-level orkestratör: payload encode + video pipeline + metric assembly.
  * REST controller bu sinifi cagirir; dahili pipeline hatalari EmbedException
@@ -28,25 +29,21 @@ public class EmbeddingService {
     private static final Logger log = LoggerFactory.getLogger(EmbeddingService.class);
 
     private final KeyManager keyManager;
-    private final PayloadEncoder payloadEncoder;
     private final VideoIO videoIO;
-    private final DctEmbedder dctEmbedder;
+    private final VideoEmbedder videoEmbedder;
     private final EmbedderProperties props;
 
     public EmbeddingService(KeyManager keyManager,
-                            PayloadEncoder payloadEncoder,
                             VideoIO videoIO,
-                            DctEmbedder dctEmbedder,
+                            VideoEmbedder videoEmbedder,
                             EmbedderProperties props) {
         this.keyManager = keyManager;
-        this.payloadEncoder = payloadEncoder;
         this.videoIO = videoIO;
-        this.dctEmbedder = dctEmbedder;
+        this.videoEmbedder = videoEmbedder;
         this.props = props;
     }
 
     public EmbedResponse embed(MultipartFile file, long watermarkId, UUID requestId) {
-        long startNanos = System.nanoTime();
         log.info("embed start request_id={} watermark_id=0x{} bytes={}",
                 requestId, String.format("%08X", watermarkId), file.getSize());
 
@@ -54,8 +51,6 @@ public class EmbeddingService {
             throw new EmbedException(ErrorCode.KEY_UNAVAILABLE,
                     ContractConstants.KEY_ENV + " is not configured");
         }
-
-        byte[] codeword84 = payloadEncoder.encode(watermarkId);
 
         Path input;
         try {
@@ -72,35 +67,28 @@ public class EmbeddingService {
         }
         Path output = outputDir.resolve(requestId + ".mp4");
 
-        int crf = clampCrf(props.h264Crf());
-        VideoIO.EmbedRunResult run = videoIO.embedVideo(input, output, codeword84, dctEmbedder, crf);
+        VideoEmbedder.VideoEmbedResult result;
+        try {
+            result = videoEmbedder.embed(input, output, watermarkId);
+        } catch (IOException e) {
+            throw new EmbedException(ErrorCode.INVALID_VIDEO, "video pipeline failed: " + e.getMessage(), e);
+        }
+        EmbedMetrics metrics = result.metrics();
 
-        double psnrViolationRatio = run.framesProcessed() == 0
+        double psnrViolationRatio = metrics.framesProcessed() == 0
                 ? 0.0
-                : (double) run.framesPsnrViolation() / run.framesProcessed();
+                : (double) metrics.framesPsnrViolation() / metrics.framesProcessed();
         if (psnrViolationRatio > ContractConstants.PSNR_VIOLATION_RATIO_LIMIT) {
             throw new EmbedException(ErrorCode.PSNR_VIOLATION,
                     String.format("PSNR < %.1f dB on %d/%d frames (%.1f%%)",
                             ContractConstants.PSNR_FLOOR_DB,
-                            run.framesPsnrViolation(),
-                            run.framesProcessed(),
+                            metrics.framesPsnrViolation(),
+                            metrics.framesProcessed(),
                             psnrViolationRatio * 100.0));
         }
 
-        double processingSec = (System.nanoTime() - startNanos) / 1_000_000_000.0;
-        EmbedMetrics metrics = new EmbedMetrics(
-                run.psnrAvgDb(),
-                run.psnrMinDb(),
-                run.mseAvg(),
-                run.mseMax(),
-                run.framesProcessed(),
-                run.framesPsnrViolation(),
-                run.durationSec(),
-                processingSec
-        );
-
         log.info("embed done request_id={} frames={} psnr_avg_db={} processing_sec={}",
-                requestId, run.framesProcessed(), run.psnrAvgDb(), processingSec);
+                requestId, metrics.framesProcessed(), metrics.psnrAvgDb(), metrics.processingSec());
 
         return EmbedResponse.success(
                 requestId.toString(),
@@ -108,18 +96,5 @@ public class EmbeddingService {
                 output.toString(),
                 metrics
         );
-    }
-
-    private static int clampCrf(int crf) {
-        if (crf == 0) {
-            return ContractConstants.H264_CRF_DEFAULT;
-        }
-        if (crf < ContractConstants.H264_CRF_MIN) {
-            return ContractConstants.H264_CRF_MIN;
-        }
-        if (crf > ContractConstants.H264_CRF_MAX) {
-            return ContractConstants.H264_CRF_MAX;
-        }
-        return crf;
     }
 }
