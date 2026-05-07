@@ -1,0 +1,67 @@
+# Project Specter — service composition (contract §6, §7.1).
+#
+# Two independent REST services on a shared bridge network and a shared
+# data volume (./shared/data ↔ /data/shared). Each service reads
+# SPECTER_WM_KEY + ports from the .env file (cp .env.example .env first;
+# real keys NEVER committed — see contract §2.1).
+
+services:
+  embedder:
+    build:
+      context: ./watermark-embedder
+      dockerfile: Dockerfile
+    image: specter/embedder:1.0
+    container_name: specter-embedder
+    ports:
+      - "${EMBEDDER_PORT:-8081}:8081"
+    env_file:
+      - .env
+    environment:
+      EMBEDDER_PORT: 8081
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      MAX_UPLOAD_MB: ${MAX_UPLOAD_MB:-500}
+      H264_CRF: ${H264_CRF:-18}
+    volumes:
+      - ./shared/data:/data/shared
+    networks:
+      - specter
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8081/api/v1/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+
+  extractor:
+    build:
+      context: ./watermark-extractor
+      dockerfile: Dockerfile
+    image: specter/extractor:1.0
+    container_name: specter-extractor
+    ports:
+      - "${EXTRACTOR_PORT:-8082}:8082"
+    env_file:
+      - .env
+    environment:
+      SERVER_PORT: 8082
+      EXTRACTOR_MAX_FRAMES: ${EXTRACTOR_MAX_FRAMES:-90}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+    volumes:
+      - ./shared/data:/data/shared
+    networks:
+      - specter
+    healthcheck:
+      # Yaren'in HealthController'i `/api/v1/extraction` altinda; ayrica
+      # ExtractionController'da `/api/v1/info` mevcut. Contract §6.1 path'i
+      # `/api/v1/health` Onur tarafinda; v2 contract revize edilebilir.
+      test: ["CMD", "curl", "-fsS", "http://localhost:8082/api/v1/extraction/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+    restart: unless-stopped
+
+networks:
+  specter:
+    driver: bridge
