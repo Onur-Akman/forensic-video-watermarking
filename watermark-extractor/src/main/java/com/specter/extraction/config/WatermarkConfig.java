@@ -121,7 +121,7 @@ public class WatermarkConfig {
     private final double confidenceThreshold;
 
     public WatermarkConfig() {
-        this.maxFrames           = readIntEnv("EXTRACTOR_MAX_FRAMES", 90);
+        this.maxFrames           = readIntEnv("EXTRACTOR_MAX_FRAMES", 180);
         this.confidenceThreshold = 0.80; // slightly above the M2 minimum (0.90 target)
     }
 

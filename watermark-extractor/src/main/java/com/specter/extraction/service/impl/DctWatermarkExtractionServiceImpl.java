@@ -26,17 +26,12 @@ public class DctWatermarkExtractionServiceImpl implements WatermarkExtractionSer
 
     private static final Logger log = LoggerFactory.getLogger(DctWatermarkExtractionServiceImpl.class);
 
-    // Contract §5.3 alignment grid (offset is in normalized [0,1] space).
     private static final double[] SEARCH_SCALES  = { 0.85, 0.90, 0.95, 1.00, 1.05 };
-    private static final double[] SEARCH_OFFSETS = {
-            -0.05, -0.025, -0.005, -0.0025, 0.0, 0.0025, 0.005, 0.025, 0.05
-    };
+    private static final double[] SEARCH_OFFSETS = { -0.05, -0.025, -0.005, 0.0, 0.005, 0.025, 0.05 };
 
-    // Tier 2 candidates probed across the full sync window: 16-bit auth tag
-    // needs strong signal to validate; sub-15-frame probes routinely return
-    // valid=false at the *correct* alignment, leaving best stuck on identity.
     private static final int SEARCH_FRAMES = 90;
     private static final int REFINE_FRAMES = 90;
+    private static final int EXTRACT_FRAMES = 30;
 
     private final VideoDecoderService         videoDecoderService;
     private final FrameSynchronizationService  frameSyncService;
@@ -91,34 +86,40 @@ public class DctWatermarkExtractionServiceImpl implements WatermarkExtractionSer
 
         List<FrameData> sFrames = syncFrames.size() > SEARCH_FRAMES ? syncFrames.subList(0, SEARCH_FRAMES) : syncFrames;
         List<FrameData> rFrames = syncFrames.size() > REFINE_FRAMES ? syncFrames.subList(0, REFINE_FRAMES) : syncFrames;
+        List<FrameData> eFrames = syncFrames.size() > EXTRACT_FRAMES ? syncFrames.subList(0, EXTRACT_FRAMES) : syncFrames;
 
         // --- Multi-Mode Search ---
         Alignment best = searchForensic(sFrames, rFrames, block, dct);
 
-        if (best == null) {
-            best = probe(syncFrames, 1.0, 0.0, 0.0, GridUtils.MappingMode.EXTRACT_SNAPPED, block, dct);
+        if (best == null || !best.valid) {
+            log.warn("Forensic search failed or invalid. Fallback to EMBED_SNAPPED identity.");
+            Alignment fallback = probe(rFrames, 1.0, 0.0, 0.0, GridUtils.MappingMode.EMBED_SNAPPED, block, dct);
+            if (better(fallback, best)) best = fallback;
         }
-        // No identity fallback when best.valid is false: the search already preferred
-        // valid candidates, so a non-valid winner is the *highest-confidence* candidate
-        // overall (e.g. crop attack at scale=0.90, ox=oy=+0.05 may not pass auth on the
-        // 90-frame probe slice but still beats identity meaningfully).
 
         log.info(String.format(
                 "Extraction Alignment: scale=%.2f ox=%+.4f oy=%+.4f mode=%s valid=%s conf=%.4f",
                 best.scale, best.ox, best.oy, best.mode, best.valid, best.conf));
 
         // --- Final Extraction ---
-        SoftResult sr = extractSoftBilinear(syncFrames, best.scale, best.ox, best.oy, best.mode, block, dct);
-        double finalConf = calcConf(sr, syncFrames.size());
-
+        SoftResult sr;
+        if (best.mode == GridUtils.MappingMode.CROP_CENTER_SNAPPED) {
+            sr = extractWithOutlierRemoval(eFrames, best.scale, best.ox, best.oy, best.mode, block, dct);
+        } else {
+            sr = extractSoftBilinear(eFrames, best.scale, best.ox, best.oy, best.mode, block, dct);
+        }
+        
+        double finalConf = calcConf(sr, eFrames.size());
         ErrorCorrectionUtils.RawPacket packet = ErrorCorrectionUtils.decode(sr.soft, spectreKeyProvider.getInterleaverKey());
         boolean valid = HmacAuthUtils.validateAuthTag(spectreKeyProvider.getAuthKey(), packet.watermarkId, packet.authTag);
+
+        if (!valid) finalConf = 0.0;
 
         return ExtractionResult.builder()
                 .extractedUuid(new UUID(0L, packet.watermarkId))
                 .confidenceScore(finalConf)
                 .valid(valid)
-                .framesAnalyzed(syncFrames.size())
+                .framesAnalyzed(eFrames.size())
                 .framesWithWatermark(syncFrames.size())
                 .processingTimeMs(System.currentTimeMillis() - startMs)
                 .timestamp(LocalDateTime.now())
@@ -129,14 +130,20 @@ public class DctWatermarkExtractionServiceImpl implements WatermarkExtractionSer
     private Alignment searchForensic(List<FrameData> sFrames, List<FrameData> rFrames, double[][] block, double[][] dct) {
         Alignment best = null;
 
-        // Tier 1: identity-ish in both mapping modes (handles bitrate/scale-down/color attacks).
+        // Tier 0: Crop identity check (CROP_CENTER_SNAPPED with zero offset)
+        Alignment cropIdentity = probe(rFrames, 1.0, 0.0, 0.0, GridUtils.MappingMode.CROP_CENTER_SNAPPED, block, dct);
+        if (cropIdentity.valid && cropIdentity.conf >= 0.80) return cropIdentity;
+        best = cropIdentity;
+
+        // Tier 1: Identity checks for other modes
         for (GridUtils.MappingMode mode : GridUtils.MappingMode.values()) {
+            if (mode == GridUtils.MappingMode.CROP_CENTER_SNAPPED) continue;
             Alignment id = probe(rFrames, 1.0, 0.0, 0.0, mode, block, dct);
             if (id.valid && id.conf >= 0.85) return id;
             if (better(id, best)) best = id;
         }
 
-        // Tier 2: full normalized-space alignment grid across both modes (handles crop).
+        // Tier 2: Alignment grid
         for (GridUtils.MappingMode mode : GridUtils.MappingMode.values()) {
             for (double scale : SEARCH_SCALES) {
                 for (double ox : SEARCH_OFFSETS) {
@@ -155,14 +162,34 @@ public class DctWatermarkExtractionServiceImpl implements WatermarkExtractionSer
                 }
             }
         }
+
+        // Tier 3: Pixel-space refinement for Crop
+        if (best.mode == GridUtils.MappingMode.CROP_CENTER_SNAPPED) {
+            Alignment pixelRef = refineCrop(rFrames, best, block, dct);
+            if (better(pixelRef, best)) best = pixelRef;
+        }
+
         return best;
     }
 
     private Alignment refine(List<FrameData> frames, Alignment base, double[][] block, double[][] dct) {
-        // Sub-grid sweep around the winning offset (normalized space).
         Alignment best = base;
         for (double dx = -0.0025; dx <= 0.0025; dx += 0.00125) {
             for (double dy = -0.0025; dy <= 0.0025; dy += 0.00125) {
+                Alignment cand = probe(frames, base.scale, base.ox + dx, base.oy + dy, base.mode, block, dct);
+                if (better(cand, best)) best = cand;
+            }
+        }
+        return best;
+    }
+
+    private Alignment refineCrop(List<FrameData> frames, Alignment base, double[][] block, double[][] dct) {
+        Alignment best = base;
+        // Search around best offset in pixel steps (Contract §5.3 mapping)
+        double[] steps = {-8, -4, -2, -1, 1, 2, 4, 8};
+        for (double dx : steps) {
+            for (double dy : steps) {
+                // ox/oy in CROP mode are pixels
                 Alignment cand = probe(frames, base.scale, base.ox + dx, base.oy + dy, base.mode, block, dct);
                 if (better(cand, best)) best = cand;
             }
@@ -200,6 +227,50 @@ public class DctWatermarkExtractionServiceImpl implements WatermarkExtractionSer
                 double v = dct[pair[0][0]][pair[0][1]] - dct[pair[1][0]][pair[1][1]];
                 soft[i]    += v;
                 absSoft[i] += Math.abs(v);
+            }
+        }
+        return new SoftResult(soft, absSoft);
+    }
+
+    private SoftResult extractWithOutlierRemoval(List<FrameData> frames,
+                                                   double scale, double ox, double oy,
+                                                   GridUtils.MappingMode mode,
+                                                   double[][] block, double[][] dct) {
+        int N = WatermarkConfig.EMBED_POINTS_PER_FRAME;
+        int frameCount = (int) frames.stream().filter(f -> f.getLuminanceChannel() != null).count();
+        if (frameCount == 0) return new SoftResult(new double[N], new double[N]);
+
+        double[][] perFrameSoft = new double[frameCount][N];
+        int fi = 0;
+        for (FrameData frame : frames) {
+            double[][] lum = frame.getLuminanceChannel();
+            if (lum == null) continue;
+            for (int i = 0; i < N; i++) {
+                double[] coords = GridUtils.getBlockCoordinates(cellIndices[i], frame.getWidth(), frame.getHeight(), scale, ox, oy, mode);
+                GridUtils.extractBlockBilinear(lum, coords[0], coords[1], block);
+                DctUtils.forwardDct8x8(block, dct);
+                int[][] pair = WatermarkConfig.DCT_PAIRS[pairIndices[i]];
+                perFrameSoft[fi][i] = dct[pair[0][0]][pair[0][1]] - dct[pair[1][0]][pair[1][1]];
+            }
+            fi++;
+        }
+
+        double[] aggSoft = new double[N];
+        for (int f = 0; f < frameCount; f++) {
+            for (int i = 0; i < N; i++) aggSoft[i] += perFrameSoft[f][i];
+        }
+
+        double[] soft = new double[N];
+        double[] absSoft = new double[N];
+        for (int f = 0; f < frameCount; f++) {
+            int agree = 0;
+            for (int i = 0; i < N; i++) {
+                if ((aggSoft[i] > 0 && perFrameSoft[f][i] > 0) || (aggSoft[i] < 0 && perFrameSoft[f][i] < 0)) agree++;
+            }
+            double weight = (agree > N * 0.7) ? 1.0 : 0.1;
+            for (int i = 0; i < N; i++) {
+                soft[i] += perFrameSoft[f][i] * weight;
+                absSoft[i] += Math.abs(perFrameSoft[f][i]) * weight;
             }
         }
         return new SoftResult(soft, absSoft);

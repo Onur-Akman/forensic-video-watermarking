@@ -72,16 +72,36 @@ public final class HammingCodec {
     }
 
     /**
-     * Decode from soft-decision values (positive = 1, non-positive = 0).
-     * Converts to hard bits then calls decodeNibble.
+     * Soft maximum-likelihood decode: tries all 16 possible nibbles,
+     * encodes each to a 7-bit codeword, and picks the nibble whose
+     * codeword has the highest correlation with the soft votes.
+     *
+     * Score = sum over 7 positions of: softCw[i] * (2*cw[i] - 1)
+     * where cw[i] ∈ {0,1} and (2*cw[i]-1) maps to {-1,+1}.
+     * Positive soft value + expected 1 → positive contribution.
+     *
+     * This handles 2+ weak bits per nibble correctly, where hard
+     * threshold + syndrome correction would fail.
      *
      * @param softCw 7-element double[] in codeword order {p1, p2, d1, p4, d2, d3, d4}
-     * @return corrected 4-bit nibble (0-15)
+     * @return best-matching 4-bit nibble (0-15)
      */
     public static int decodeNibbleSoft(double[] softCw) {
         if (softCw.length != 7) throw new IllegalArgumentException("Soft codeword must be 7 elements");
-        int[] hard = new int[7];
-        for (int i = 0; i < 7; i++) hard[i] = softCw[i] > 0 ? 1 : 0;
-        return decodeNibble(hard);
+        int bestNibble = 0;
+        double bestScore = Double.NEGATIVE_INFINITY;
+        for (int candidate = 0; candidate < 16; candidate++) {
+            int[] cw = encodeNibble(candidate);
+            double score = 0.0;
+            for (int i = 0; i < 7; i++) {
+                // Map cw bit {0,1} → {-1,+1}, multiply by soft vote
+                score += softCw[i] * (2 * cw[i] - 1);
+            }
+            if (score > bestScore) {
+                bestScore = score;
+                bestNibble = candidate;
+            }
+        }
+        return bestNibble;
     }
 }

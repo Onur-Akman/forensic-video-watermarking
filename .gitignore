@@ -45,5 +45,11 @@ test-videos/
 specter-client/
 *.mp4
 *.png
-!**/*.gitkeep
+!.gitkeep
+
+# IDE & AI Tools
+.kilo/
+yarene*kopyasi/
+yarene*kopyası/
+Project_Specter_Specification_v3.pdf
 
