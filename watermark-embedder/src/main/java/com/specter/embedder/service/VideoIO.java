@@ -11,12 +11,15 @@ import java.nio.file.Path;
 import java.util.UUID;
 
 /**
- * Video I/O cephesi: upload'i temp'e yazar, decode -> Y embed -> H.264 (libx264) yuv420p MP4
+ * Video I/O cephesi: upload'i temp'e yazar, decode -> Y embed -> H.264
+ * (libx264) yuv420p MP4
  * encode pipeline'ini kosturur. Audio passthrough (contract section 4.4).
  *
- * Contract section 4.4: Embedder FFmpeg parametrelerini logsuna yazmak zorundadir.
+ * Contract section 4.4: Embedder FFmpeg parametrelerini logsuna yazmak
+ * zorundadir.
  *
- * Skeleton: gercek decode/encode JavaCV (FFmpegFrameGrabber/Recorder) ile M2'de eklenecek.
+ * Skeleton: gercek decode/encode JavaCV (FFmpegFrameGrabber/Recorder) ile M2'de
+ * eklenecek.
  */
 @Component
 public class VideoIO {
